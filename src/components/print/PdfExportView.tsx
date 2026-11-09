@@ -87,7 +87,11 @@ export const PdfExportView: React.FC = () => {
       const pdfBytes = await generateStudentCardsPdf(
         exportList,
         currentTemplate,
-        printSettings,
+        {
+          ...printSettings,
+          cardWidthMm: currentTemplate.cardWidthMm,
+          cardHeightMm: currentTemplate.cardHeightMm,
+        },
         printMode,
         (p) => setProgress(p)
       );
@@ -291,24 +295,24 @@ export const PdfExportView: React.FC = () => {
               value={printSettings.cardsPerPage === 4 ? '4' : '9'}
               onChange={(v) => {
                 if (v === '4') {
-                  setCardDimensions(95, 135);
+                  setCardDimensions(70, 100);
                   updatePrintSetting('cardsPerPage', 4);
                   updatePrintSetting('gridColumns', 2);
                   updatePrintSetting('gridRows', 2);
                   addToast({
                     type: 'info',
                     title: 'ប្លង់ ១ សន្លឹក ៤ កាត',
-                    message: 'បានកំណត់ទំហំ ៩៥ × ១៣៥ mm (៤ កាតលើ A4 ខ្នាតធំច្បាស់)',
+                    message: 'បានកំណត់ទំហំ ៧ × ១០ cm ស្រោម A3 (៤ កាតលើ A4)',
                   });
                 } else {
-                  setCardDimensions(64, 92);
+                  setCardDimensions(60, 90);
                   updatePrintSetting('cardsPerPage', 9);
                   updatePrintSetting('gridColumns', 3);
                   updatePrintSetting('gridRows', 3);
                   addToast({
                     type: 'info',
                     title: 'ប្លង់ ១ សន្លឹក ៩ កាត',
-                    message: 'បានកំណត់ទំហំ ៦៤ × ៩២ mm (៩ កាតលើ A4 គំរូដើមក្រសួង)',
+                    message: 'បានកំណត់ទំហំ ៦ × ៩ cm ស្រោម A2 (៩ កាតលើ A4 មិនដាច់គែម)',
                   });
                 }
               }}
@@ -340,7 +344,8 @@ export const PdfExportView: React.FC = () => {
               onChange={(e) => {
                 const [w, h] = e.target.value.split('x').map(Number);
                 setCardDimensions(w, h);
-                if (w >= 90 || h >= 120) {
+                const isFourCards = w > 68 || h > 95;
+                if (isFourCards) {
                   updatePrintSetting('cardsPerPage', 4);
                   updatePrintSetting('gridColumns', 2);
                   updatePrintSetting('gridRows', 2);
@@ -352,10 +357,10 @@ export const PdfExportView: React.FC = () => {
               }}
               className="px-3 py-1.5 rounded-full text-xs bg-[#f5f5f7] border border-black/[0.06] font-semibold text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]"
             >
-              <option value="60x90">6 cm × 9 cm (ស្រោមផ្លាស្ទិក A2 - ៩ កាតលើ A4)</option>
-              <option value="70x100">7 cm × 10 cm (ស្រោមផ្លាស្ទិក A3 - ៤ កាតលើ A4)</option>
-              <option value="64x92">64 × 92 mm (គំរូដើម MoEYS - ៩ កាតលើ A4)</option>
-              <option value="95x135">95 × 135 mm (ខ្នាតធំ A6 - ៤ កាតលើ A4)</option>
+              <option value="60x90">6 cm × 9 cm (ស្រោមផ្លាស្ទិក A2 — ៩ កាតលើ A4)</option>
+              <option value="64x92">6.4 cm × 9.2 cm (គំរូដើម MoEYS — ៩ កាតលើ A4)</option>
+              <option value="70x100">7 cm × 10 cm (ស្រោមផ្លាស្ទិក A3 — ៤ កាតលើ A4)</option>
+              <option value="95x135">9.5 cm × 13.5 cm (ខ្នាតធំ A6 — ៤ កាតលើ A4)</option>
               <option value="86x54">86 × 54 mm (CR80 / ATM ផ្ដេក)</option>
               <option value="54x86">54 × 86 mm (CR80 / ATM បញ្ឈរ)</option>
               <option value="65x95">65 × 95 mm (Pouch អ៊ុតផ្លាស្ទិក)</option>

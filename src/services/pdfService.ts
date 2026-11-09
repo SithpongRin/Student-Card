@@ -90,8 +90,10 @@ export async function generateStudentCardsPdf(
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
 
-  const paperWidthPt = settings.paperWidthMm * MM_TO_PT; // ~595.28 pt (A4)
-  const paperHeightPt = settings.paperHeightMm * MM_TO_PT; // ~841.89 pt (A4)
+  const paperWidthMm = settings.paperWidthMm || 210;
+  const paperHeightMm = settings.paperHeightMm || 297;
+  const paperWidthPt = paperWidthMm * MM_TO_PT; // ~595.28 pt (A4)
+  const paperHeightPt = paperHeightMm * MM_TO_PT; // ~841.89 pt (A4)
 
   const cardWidthMm = settings.cardWidthMm || template.cardWidthMm || 64;
   const cardHeightMm = settings.cardHeightMm || template.cardHeightMm || 92;
@@ -101,17 +103,36 @@ export async function generateStudentCardsPdf(
   const defaultGrid = calculateA4GridLayout(
     cardWidthMm,
     cardHeightMm,
-    settings.paperWidthMm || 210,
-    settings.paperHeightMm || 297,
+    paperWidthMm,
+    paperHeightMm,
     settings.cardsPerPage
   );
 
-  const cols = settings.gridColumns || defaultGrid.cols;
-  const rows = settings.gridRows || defaultGrid.rows;
+  // Guarantee grid respects sheet limits: cols and rows must fit on A4
+  const cols = defaultGrid.cols;
+  const rows = defaultGrid.rows;
   const cardsPerPage = cols * rows;
 
-  const marginTopPt = (settings.marginTopMm ?? defaultGrid.marginTopMm) * MM_TO_PT;
-  const marginLeftPt = (settings.marginLeftMm ?? defaultGrid.marginLeftMm) * MM_TO_PT;
+  // Clamp margins to guarantee Row 3 (or any row) never overflows off the bottom of the page
+  const maxSafeTopMm = Math.max(0, paperHeightMm - rows * cardHeightMm);
+  const maxSafeLeftMm = Math.max(0, paperWidthMm - cols * cardWidthMm);
+
+  const safeMarginTopMm =
+    settings.marginTopMm !== undefined &&
+    settings.marginTopMm >= 0 &&
+    settings.marginTopMm <= maxSafeTopMm
+      ? settings.marginTopMm
+      : defaultGrid.marginTopMm;
+
+  const safeMarginLeftMm =
+    settings.marginLeftMm !== undefined &&
+    settings.marginLeftMm >= 0 &&
+    settings.marginLeftMm <= maxSafeLeftMm
+      ? settings.marginLeftMm
+      : defaultGrid.marginLeftMm;
+
+  const marginTopPt = safeMarginTopMm * MM_TO_PT;
+  const marginLeftPt = safeMarginLeftMm * MM_TO_PT;
 
   const duplexOffsetXPts = (settings.duplexOffsetXmM || 0) * MM_TO_PT;
   const duplexOffsetYPts = (settings.duplexOffsetYmM || 0) * MM_TO_PT;
@@ -129,8 +150,8 @@ export async function generateStudentCardsPdf(
       percent: 5,
     });
     const backCanvas = await renderBackCardToCanvas(template, {
-      widthMm: settings.cardWidthMm,
-      heightMm: settings.cardHeightMm,
+      widthMm: cardWidthMm,
+      heightMm: cardHeightMm,
     });
     const backBytes = await canvasToPngBuffer(backCanvas);
     backImageEmbed = await pdfDoc.embedPng(backBytes);
@@ -178,8 +199,8 @@ export async function generateStudentCardsPdf(
 
         // Render card front canvas at 300 DPI
         const frontCanvas = await renderFrontCardToCanvas(student, template, {
-          widthMm: settings.cardWidthMm,
-          heightMm: settings.cardHeightMm,
+          widthMm: cardWidthMm,
+          heightMm: cardHeightMm,
         });
         const frontBytes = await canvasToPngBuffer(frontCanvas);
         const frontImage = await pdfDoc.embedPng(frontBytes);

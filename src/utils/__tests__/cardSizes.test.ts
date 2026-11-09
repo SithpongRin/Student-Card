@@ -66,4 +66,12 @@ describe('Card Sizes & A4 Grid Layout', () => {
     expect(layout.marginLeftMm).toBe(35);
     expect(layout.marginTopMm).toBe(48.5);
   });
+
+  it('safely falls back to 4 cards (2x2) when 9 cards requested for 70x100mm because 3x100mm > 297mm', () => {
+    const layout = calculateA4GridLayout(70, 100, 210, 297, 9);
+    expect(layout.cols).toBe(2);
+    expect(layout.rows).toBe(2);
+    expect(layout.cardsPerPage).toBe(4);
+    expect(layout.rows * 100).toBeLessThanOrEqual(297);
+  });
 });

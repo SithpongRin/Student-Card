@@ -169,6 +169,29 @@ export function calculateA4GridLayout(
 
   // If user explicitly chose 9 cards per sheet (3x3 grid)
   if (targetCardsPerPage === 9) {
+    // If the card height is too large for 3 rows on A4 (e.g. 100mm, 135mm),
+    // 3 * 100 = 300mm > 297mm. It is physically impossible to fit 9 cards!
+    // Safely fallback to 4 cards (2x2 grid) so content never gets cut off.
+    if (cardHeightMm * 3 > paperHeightMm || cardWidthMm * 3 > paperWidthMm) {
+      const cols = 2;
+      const rows = 2;
+      const totalW = cols * cardWidthMm;
+      const totalH = rows * cardHeightMm;
+      const marginLeftMm = Math.max(0, (paperWidthMm - totalW) / 2);
+      const marginTopMm = Math.max(0, (paperHeightMm - totalH) / 2);
+      return {
+        cols,
+        rows,
+        cardsPerPage: 4,
+        marginLeftMm: Math.round(marginLeftMm * 10) / 10,
+        marginTopMm: Math.round(marginTopMm * 10) / 10,
+        cardWidthMm,
+        cardHeightMm,
+        paperWidthMm,
+        paperHeightMm,
+      };
+    }
+
     const cols = 3;
     const rows = 3;
     const totalW = cols * cardWidthMm;

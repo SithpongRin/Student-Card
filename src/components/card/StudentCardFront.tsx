@@ -365,7 +365,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   <div className="text-center">
                     <div
                       style={{ color: blueColor }}
-                      className="font-moul text-[13px] leading-[19px] tracking-wide"
+                      className="font-moul text-[11.5px] leading-[17px] tracking-normal"
                     >
                       {template.cardTitleKm}
                     </div>
@@ -403,7 +403,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                       <span className="shrink-0 font-medium text-[9.5px]">គោត្តនាម-នាមៈ</span>
                       <span className="flex-1 pl-1 truncate">
                         {nameKm ? (
-                          <span className="font-bold text-[12px] tracking-wide">{nameKm}</span>
+                          <span className="font-bold text-[11px] tracking-wide">{nameKm}</span>
                         ) : (
                           <span className="font-normal opacity-70 text-[8.5px]">........................</span>
                         )}
@@ -411,11 +411,11 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     </div>
                     {/* Row 2: ភេទ & សញ្ជាតិ */}
                     <div className="flex items-baseline text-[9.5px]">
-                      <div className="flex items-baseline w-[86px]">
+                      <div className="flex items-baseline w-[56px] shrink-0">
                         <span className="shrink-0 font-medium">ភេទ</span>
                         <span className="pl-1 truncate">
                           {gender ? (
-                            <span className="font-bold text-[10.5px]">{gender}</span>
+                            <span className="font-bold text-[10px]">{gender}</span>
                           ) : (
                             <span className="font-normal opacity-70 text-[8.5px]">......</span>
                           )}
@@ -425,7 +425,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                         <span className="shrink-0 font-medium">សញ្ជាតិ</span>
                         <span className="pl-1 truncate">
                           {nationality ? (
-                            <span className="font-bold text-[10.5px]">{nationality}</span>
+                            <span className="font-bold text-[10px]">{nationality}</span>
                           ) : (
                             <span className="font-normal opacity-70 text-[8.5px]">......</span>
                           )}
@@ -435,11 +435,11 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
 
                     {/* Row 3: ថ្នាក់ទី & អត្តលេខ */}
                     <div className="flex items-baseline text-[9.5px]">
-                      <div className="flex items-baseline w-[86px]">
+                      <div className="flex items-baseline w-[56px] shrink-0">
                         <span className="shrink-0 font-medium">ថ្នាក់ទី</span>
                         <span className="pl-1 truncate">
                           {studentClass ? (
-                            <span className="font-bold text-[11px] font-sans">{studentClass}</span>
+                            <span className="font-bold text-[10.5px] font-sans">{studentClass}</span>
                           ) : (
                             <span className="font-normal opacity-70 text-[8.5px]">......</span>
                           )}
@@ -449,7 +449,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                         <span className="shrink-0 font-medium">អត្តលេខៈ</span>
                         <span className="pl-1 truncate">
                           {studentId ? (
-                            <span className="font-bold text-[10.5px] font-sans">{studentId}</span>
+                            <span className="font-bold text-[9.5px] font-sans">{studentId}</span>
                           ) : (
                             <span className="font-normal opacity-70 text-[8.5px]">......</span>
                           )}

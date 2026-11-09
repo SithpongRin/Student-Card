@@ -264,11 +264,17 @@ export async function renderFrontCardToCanvas(
       : '';
 
     if (displaySchoolName) {
-      // NO DOTS when filled! BOLD font!
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      // NO DOTS when filled! BOLD font with auto-scaling to prevent border cut-off
+      let sFont = 10.5;
+      ctx.font = `bold ${Math.round(sFont * sRatio)}px ${FONT_BATTAMBANG}`;
+      const maxSchoolW = (cx + cw - 2 * sRatio) - schoolLineX1;
+      while (ctx.measureText(displaySchoolName).width > maxSchoolW && sFont > 7.5) {
+        sFont -= 0.5;
+        ctx.font = `bold ${Math.round(sFont * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(displaySchoolName, schoolLineX1, ySchool);
     } else {
-      drawDottedLine(ctx, schoolLineX1, ySchool + fSchool, schoolLineX2, blue, 1 * sRatio);
+      drawDottedLine(ctx, schoolLineX1, ySchool + fSchool, schoolLineX2 - 2 * sRatio, blue, 1 * sRatio);
     }
 
     // 4. Photo Box on Left: exact 84 x 112 in 242-base (3:4 ratio, ~34.7% card width, matches original card)
@@ -299,10 +305,15 @@ export async function renderFrontCardToCanvas(
     const rx = photoX + photoW + 8 * sRatio;
     const rw = cx + cw - rx;
 
-    // Title: អត្តសញ្ញាណប័ណ្ណសិស្ស
-    const fTitle = Math.round(13 * sRatio);
+    // Title: អត្តសញ្ញាណប័ណ្ណសិស្ស (Auto-scaled to prevent touching right border or photo box)
+    let fTitle = Math.round(11.5 * sRatio);
     ctx.textAlign = 'center';
     ctx.font = `normal ${fTitle}px ${FONT_MOUL}`;
+    const maxTitleW = rw - 8 * sRatio;
+    while (ctx.measureText(template.cardTitleKm).width > maxTitleW && fTitle > 8 * sRatio) {
+      fTitle -= 0.5 * sRatio;
+      ctx.font = `normal ${Math.round(fTitle)}px ${FONT_MOUL}`;
+    }
     ctx.fillText(template.cardTitleKm, rx + rw / 2, photoY);
 
     // Card Number / Prefix
@@ -366,17 +377,25 @@ export async function renderFrontCardToCanvas(
     ctx.fillText('គោត្តនាម-នាមៈ', rx, rowCurY);
     const nW = ctx.measureText('គោត្តនាម-នាមៈ').width;
     const nX1 = rx + nW + 3 * sRatio;
+    const maxNameW = (cx + cw - 2 * sRatio) - (nX1 + 2 * sRatio);
     if (student?.nameKm) {
-      ctx.font = `bold ${Math.round(11 * sRatio)}px ${FONT_BATTAMBANG}`;
+      let nameFontSize = 11;
+      ctx.font = `bold ${Math.round(nameFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      while (ctx.measureText(student.nameKm).width > maxNameW && nameFontSize > 7.5) {
+        nameFontSize -= 0.5;
+        ctx.font = `bold ${Math.round(nameFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(student.nameKm, nX1 + 2 * sRatio, rowCurY);
     } else {
-      drawDottedLine(ctx, nX1, rowCurY + fField, rx + rw, blue, 1 * sRatio);
+      drawDottedLine(ctx, nX1, rowCurY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
 
-    // Row 2: ភេទ & សញ្ជាតិ (Col 2 aligned adaptively)
+    // Row 2 & 3: Col 2 aligned with ample room so student ID and nationality never truncate
+    // Col 1 needs ~46px for ភេទ/ថ្នាក់ទី + value; Col 2 gets the remaining ~96px of rw
     rowCurY += 15 * sRatio;
-    const col2X = rx + Math.max(rw * 0.46, 68 * sRatio);
+    const col2X = rx + Math.round(rw * 0.35);
 
+    // Row 2: ភេទ & សញ្ជាតិ
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ភេទ', rx, rowCurY);
     const gW = ctx.measureText('ភេទ').width;
@@ -393,14 +412,20 @@ export async function renderFrontCardToCanvas(
     const natW = ctx.measureText('សញ្ជាតិ').width;
     const natX1 = col2X + natW + 3 * sRatio;
     const natVal = student?.nationality || (student?.nameKm ? 'ខ្មែរ' : '');
+    const maxNatW = (cx + cw - 2 * sRatio) - (natX1 + 2 * sRatio);
     if (natVal) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      let natFontSize = 10.5;
+      ctx.font = `bold ${Math.round(natFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      while (ctx.measureText(natVal).width > maxNatW && natFontSize > 7.5) {
+        natFontSize -= 0.5;
+        ctx.font = `bold ${Math.round(natFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(natVal, natX1 + 2 * sRatio, rowCurY);
     } else {
-      drawDottedLine(ctx, natX1, rowCurY + fField, rx + rw, blue, 1 * sRatio);
+      drawDottedLine(ctx, natX1, rowCurY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
 
-    // Row 3: ថ្នាក់ទី & អត្តលេខៈ (Arabic Numerals for Class, Col 2 aligned at col2X)
+    // Row 3: ថ្នាក់ទី & អត្តលេខៈ (Arabic Numerals for Class, Student ID auto-scaled to prevent any cutoff)
     rowCurY += 15 * sRatio;
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ថ្នាក់ទី', rx, rowCurY);
@@ -417,12 +442,18 @@ export async function renderFrontCardToCanvas(
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('អត្តលេខៈ', col2X, rowCurY);
     const idW = ctx.measureText('អត្តលេខៈ').width;
-    const idX1 = col2X + idW + 3 * sRatio;
+    const idX1 = col2X + idW + 2 * sRatio;
+    const maxIdW = (cx + cw - 2 * sRatio) - (idX1 + 2 * sRatio);
     if (student?.studentId) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px sans-serif`;
+      let idFontSize = 9.5;
+      ctx.font = `bold ${Math.round(idFontSize * sRatio)}px sans-serif`;
+      while (ctx.measureText(student.studentId).width > maxIdW && idFontSize > 6.0) {
+        idFontSize -= 0.5;
+        ctx.font = `bold ${Math.round(idFontSize * sRatio)}px sans-serif`;
+      }
       ctx.fillText(student.studentId, idX1 + 2 * sRatio, rowCurY);
     } else {
-      drawDottedLine(ctx, idX1, rowCurY + fField, rx + rw, blue, 1 * sRatio);
+      drawDottedLine(ctx, idX1, rowCurY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
 
     // 6. 5 Full Width Lines below Photo Box
@@ -441,11 +472,17 @@ export async function renderFrontCardToCanvas(
       ctx.fillText(label, cx, fullY);
       const lw = ctx.measureText(label).width;
       const lx1 = cx + lw + 4 * sRatio;
-      const lx2 = cx + cw;
+      const lx2 = cx + cw - 2 * sRatio;
 
       if (value) {
         const fontFam = isArabicFont ? 'sans-serif' : FONT_BATTAMBANG;
-        ctx.font = `${isBoldVal ? 'bold' : 'normal'} ${Math.round(boldFontSize * sRatio)}px ${fontFam}`;
+        let curFontSize = boldFontSize;
+        ctx.font = `${isBoldVal ? 'bold' : 'normal'} ${Math.round(curFontSize * sRatio)}px ${fontFam}`;
+        const maxValW = lx2 - (lx1 + 2 * sRatio);
+        while (ctx.measureText(value).width > maxValW && curFontSize > 6.5) {
+          curFontSize -= 0.5;
+          ctx.font = `${isBoldVal ? 'bold' : 'normal'} ${Math.round(curFontSize * sRatio)}px ${fontFam}`;
+        }
         ctx.fillText(value, lx1 + 2 * sRatio, fullY);
       } else {
         drawDottedLine(ctx, lx1, fullY + fField, lx2, blue, 1 * sRatio);
@@ -460,17 +497,23 @@ export async function renderFrontCardToCanvas(
     // 2. ទីកន្លែងកំណើតៈ
     drawFullLine('ទីកន្លែងកំណើតៈ', student?.placeOfBirth, true, false, 10);
 
-    // 3. ឪពុកឈ្មោះៈ & មុខរបរ (មុខរបរ shifted left, aligned adaptively)
-    const jobColX = cx + Math.max(cw * 0.52, 130 * sRatio);
+    // 3. ឪពុកឈ្មោះៈ & មុខរបរ (aligned with auto-scaling to prevent overflow)
+    const jobColX = cx + Math.max(cw * 0.50, 120 * sRatio);
 
     ctx.textAlign = 'left';
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ឪពុកឈ្មោះៈ', cx, fullY);
     const fLabelW = ctx.measureText('ឪពុកឈ្មោះៈ').width;
     const fL1 = cx + fLabelW + 4 * sRatio;
+    const maxFatherW = (jobColX - 6 * sRatio) - (fL1 + 2 * sRatio);
 
     if (student?.fatherName) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      let fFontSize = 10.5;
+      ctx.font = `bold ${Math.round(fFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      while (ctx.measureText(student.fatherName).width > maxFatherW && fFontSize > 6.5) {
+        fFontSize -= 0.5;
+        ctx.font = `bold ${Math.round(fFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(student.fatherName, fL1 + 2 * sRatio, fullY);
     } else {
       drawDottedLine(ctx, fL1, fullY + fField, jobColX - 6 * sRatio, blue, 1 * sRatio);
@@ -480,23 +523,35 @@ export async function renderFrontCardToCanvas(
     ctx.fillText('មុខរបរ', jobColX, fullY);
     const j1LabelW = ctx.measureText('មុខរបរ').width;
     const j1L1 = jobColX + j1LabelW + 4 * sRatio;
+    const maxJob1W = (cx + cw - 2 * sRatio) - (j1L1 + 2 * sRatio);
 
     if (student?.fatherOccupation) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      let j1FontSize = 10.5;
+      ctx.font = `bold ${Math.round(j1FontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      while (ctx.measureText(student.fatherOccupation).width > maxJob1W && j1FontSize > 6.5) {
+        j1FontSize -= 0.5;
+        ctx.font = `bold ${Math.round(j1FontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(student.fatherOccupation, j1L1 + 2 * sRatio, fullY);
     } else {
-      drawDottedLine(ctx, j1L1, fullY + fField, cx + cw, blue, 1 * sRatio);
+      drawDottedLine(ctx, j1L1, fullY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
     fullY += lineGap;
 
-    // 4. ម្តាយឈ្មោះៈ & មុខរបរ (មុខរបរ shifted left, aligned at jobColX)
+    // 4. ម្តាយឈ្មោះៈ & មុខរបរ (aligned with auto-scaling to prevent overflow)
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ម្តាយឈ្មោះៈ', cx, fullY);
     const mLabelW = ctx.measureText('ម្តាយឈ្មោះៈ').width;
     const mL1 = cx + mLabelW + 4 * sRatio;
+    const maxMotherW = (jobColX - 6 * sRatio) - (mL1 + 2 * sRatio);
 
     if (student?.motherName) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      let mFontSize = 10.5;
+      ctx.font = `bold ${Math.round(mFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      while (ctx.measureText(student.motherName).width > maxMotherW && mFontSize > 6.5) {
+        mFontSize -= 0.5;
+        ctx.font = `bold ${Math.round(mFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(student.motherName, mL1 + 2 * sRatio, fullY);
     } else {
       drawDottedLine(ctx, mL1, fullY + fField, jobColX - 6 * sRatio, blue, 1 * sRatio);
@@ -506,12 +561,18 @@ export async function renderFrontCardToCanvas(
     ctx.fillText('មុខរបរ', jobColX, fullY);
     const j2LabelW = ctx.measureText('មុខរបរ').width;
     const j2L1 = jobColX + j2LabelW + 4 * sRatio;
+    const maxJob2W = (cx + cw - 2 * sRatio) - (j2L1 + 2 * sRatio);
 
     if (student?.motherOccupation) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      let j2FontSize = 10.5;
+      ctx.font = `bold ${Math.round(j2FontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      while (ctx.measureText(student.motherOccupation).width > maxJob2W && j2FontSize > 6.5) {
+        j2FontSize -= 0.5;
+        ctx.font = `bold ${Math.round(j2FontSize * sRatio)}px ${FONT_BATTAMBANG}`;
+      }
       ctx.fillText(student.motherOccupation, j2L1 + 2 * sRatio, fullY);
     } else {
-      drawDottedLine(ctx, j2L1, fullY + fField, cx + cw, blue, 1 * sRatio);
+      drawDottedLine(ctx, j2L1, fullY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
     fullY += lineGap;
 
@@ -668,19 +729,31 @@ export async function renderFrontCardToCanvas(
     curY += 18 * sRatio;
     ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
     ctx.fillText('ទីកន្លែងកំណើតៈ', cx, curY);
+    const maxPobW = (cx + cw - 2 * sRatio) - (cx + 75 * sRatio);
     if (student?.placeOfBirth) {
-      ctx.font = `bold ${fField}px 'Battambang', sans-serif`;
+      let pobFont = fField;
+      ctx.font = `bold ${pobFont}px 'Battambang', sans-serif`;
+      while (ctx.measureText(student.placeOfBirth).width > maxPobW && pobFont > 7 * sRatio) {
+        pobFont -= 0.5 * sRatio;
+        ctx.font = `bold ${pobFont}px 'Battambang', sans-serif`;
+      }
       ctx.fillText(student.placeOfBirth, cx + 75 * sRatio, curY);
     } else {
-      drawDottedLine(ctx, cx + 75 * sRatio, curY + fField, cx + cw, blue, 1 * sRatio);
+      drawDottedLine(ctx, cx + 75 * sRatio, curY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
 
     // ឪពុក & ម្តាយ
     curY += 18 * sRatio;
     ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
     ctx.fillText('ឪពុកឈ្មោះៈ', cx, curY);
+    const maxFatherValW = (cx + 128 * sRatio) - (cx + 64 * sRatio);
     if (student?.fatherName) {
-      ctx.font = `bold ${fField}px 'Battambang', sans-serif`;
+      let fFont = fField;
+      ctx.font = `bold ${fFont}px 'Battambang', sans-serif`;
+      while (ctx.measureText(student.fatherName).width > maxFatherValW && fFont > 7 * sRatio) {
+        fFont -= 0.5 * sRatio;
+        ctx.font = `bold ${fFont}px 'Battambang', sans-serif`;
+      }
       ctx.fillText(student.fatherName, cx + 64 * sRatio, curY);
     } else {
       drawDottedLine(ctx, cx + 64 * sRatio, curY + fField, cx + 128 * sRatio, blue, 1 * sRatio);
@@ -688,11 +761,17 @@ export async function renderFrontCardToCanvas(
 
     ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
     ctx.fillText('ម្តាយឈ្មោះៈ', cx + 132 * sRatio, curY);
+    const maxMotherValW = (cx + cw - 2 * sRatio) - (cx + 188 * sRatio);
     if (student?.motherName) {
-      ctx.font = `bold ${fField}px 'Battambang', sans-serif`;
-      ctx.fillText(student.motherName, cx + 190 * sRatio, curY);
+      let mFont = fField;
+      ctx.font = `bold ${mFont}px 'Battambang', sans-serif`;
+      while (ctx.measureText(student.motherName).width > maxMotherValW && mFont > 7 * sRatio) {
+        mFont -= 0.5 * sRatio;
+        ctx.font = `bold ${mFont}px 'Battambang', sans-serif`;
+      }
+      ctx.fillText(student.motherName, cx + 188 * sRatio, curY);
     } else {
-      drawDottedLine(ctx, cx + 190 * sRatio, curY + fField, cx + cw, blue, 1 * sRatio);
+      drawDottedLine(ctx, cx + 188 * sRatio, curY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
 
     // Bottom Photo & Signatures
