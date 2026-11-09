@@ -40,14 +40,30 @@ describe('Card Sizes & A4 Grid Layout', () => {
     expect(layout.rows * 54).toBeLessThanOrEqual(297);
   });
 
-  it('calculates 2x2=4 cards for 95x135mm on A4 sheet', () => {
-    const layout = calculateA4GridLayout(95, 135, 210, 297, 4);
+  it('has 60x90mm (A2) and 70x100mm (A3) pouch presets', () => {
+    const a2 = CARD_SIZE_PRESETS.find((p) => p.widthMm === 60 && p.heightMm === 90);
+    const a3 = CARD_SIZE_PRESETS.find((p) => p.widthMm === 70 && p.heightMm === 100);
+    expect(a2).toBeDefined();
+    expect(a3).toBeDefined();
+    expect(a2?.id).toBe('a2-pouch-6x9');
+    expect(a3?.id).toBe('a3-pouch-7x10');
+  });
+
+  it('calculates 3x3=9 cards for 60x90mm (A2 Pouch) on A4 sheet', () => {
+    const layout = calculateA4GridLayout(60, 90, 210, 297, 9);
+    expect(layout.cols).toBe(3);
+    expect(layout.rows).toBe(3);
+    expect(layout.cardsPerPage).toBe(9);
+    expect(layout.marginLeftMm).toBe(15);
+    expect(layout.marginTopMm).toBe(13.5);
+  });
+
+  it('calculates 2x2=4 cards for 70x100mm (A3 Pouch) on A4 sheet', () => {
+    const layout = calculateA4GridLayout(70, 100, 210, 297, 4);
     expect(layout.cols).toBe(2);
     expect(layout.rows).toBe(2);
     expect(layout.cardsPerPage).toBe(4);
-    expect(layout.marginLeftMm).toBe(10);
-    expect(layout.marginTopMm).toBe(13.5);
-    expect(layout.cols * 95).toBeLessThanOrEqual(210);
-    expect(layout.rows * 135).toBeLessThanOrEqual(297);
+    expect(layout.marginLeftMm).toBe(35);
+    expect(layout.marginTopMm).toBe(48.5);
   });
 });

@@ -352,12 +352,13 @@ export const PdfExportView: React.FC = () => {
               }}
               className="px-3 py-1.5 rounded-full text-xs bg-[#f5f5f7] border border-black/[0.06] font-semibold text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]"
             >
-              <option value="64x92">64 × 92 mm (MoEYS ៩ កាតលើ A4)</option>
-              <option value="95x135">95 × 135 mm (ខ្នាតធំ ៤ កាតលើ A4)</option>
+              <option value="60x90">6 cm × 9 cm (ស្រោមផ្លាស្ទិក A2 - ៩ កាតលើ A4)</option>
+              <option value="70x100">7 cm × 10 cm (ស្រោមផ្លាស្ទិក A3 - ៤ កាតលើ A4)</option>
+              <option value="64x92">64 × 92 mm (គំរូដើម MoEYS - ៩ កាតលើ A4)</option>
+              <option value="95x135">95 × 135 mm (ខ្នាតធំ A6 - ៤ កាតលើ A4)</option>
               <option value="86x54">86 × 54 mm (CR80 / ATM ផ្ដេក)</option>
               <option value="54x86">54 × 86 mm (CR80 / ATM បញ្ឈរ)</option>
               <option value="65x95">65 × 95 mm (Pouch អ៊ុតផ្លាស្ទិក)</option>
-              <option value="70x100">70 × 100 mm (B7 ខ្នាតធំ)</option>
               <option value="74x105">74 × 105 mm (A7)</option>
             </select>
           </div>

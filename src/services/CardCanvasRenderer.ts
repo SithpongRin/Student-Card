@@ -13,6 +13,9 @@ import {
 export const DPI_300 = 300;
 export const MM_TO_PX_300 = 300 / 25.4; // ~11.811 pixels per mm
 
+export const FONT_MOUL = "'Moul', 'Khmer OS Muol Light', serif";
+export const FONT_BATTAMBANG = "'Battambang', 'Khmer OS Battambang', 'Khmer OS', sans-serif";
+
 export interface RenderCardOptions {
   widthMm?: number;
   heightMm?: number;
@@ -50,11 +53,16 @@ export async function ensureKhmerFontsLoaded(): Promise<void> {
   if ('fonts' in document) {
     try {
       await Promise.all([
-        document.fonts.load('bold 26px Moul'),
-        document.fonts.load('normal 26px Moul'),
-        document.fonts.load('bold 24px Battambang'),
-        document.fonts.load('normal 24px Battambang'),
+        document.fonts.load("normal 16px 'Moul'"),
+        document.fonts.load("normal 24px 'Moul'"),
+        document.fonts.load("normal 32px 'Moul'"),
+        document.fonts.load("bold 26px 'Moul'"),
+        document.fonts.load("normal 14px 'Battambang'"),
+        document.fonts.load("bold 14px 'Battambang'"),
+        document.fonts.load("normal 24px 'Battambang'"),
+        document.fonts.load("bold 24px 'Battambang'"),
       ]);
+      await document.fonts.ready;
     } catch (e) {
       console.warn('Font loading check warning:', e);
     }
@@ -104,10 +112,10 @@ export async function renderFrontCardToCanvas(
 
   const isLandscape = widthMm > heightMm;
 
-  // The base responsive reference layout is 320px width x 460px height.
-  // For portrait cards, sRatio maps 320px base units directly to canvas device pixels.
-  // For landscape cards, sRatio maps 460px base units to canvas pixels.
-  const sRatio = isLandscape ? widthPx / 460 : widthPx / 320;
+  // The base responsive reference layout is 242px width x 348px height.
+  // For portrait cards, sRatio maps 242px base units directly to canvas device pixels.
+  // For landscape cards, sRatio maps 350px base units to canvas pixels.
+  const sRatio = isLandscape ? widthPx / 350 : widthPx / 242;
 
   const canvas = document.createElement('canvas');
   canvas.width = widthPx;
@@ -122,8 +130,8 @@ export async function renderFrontCardToCanvas(
   const blue = template.primaryColor || '#163d7e';
   const isBottomPhoto = template.variant === 'bottom-photo';
 
-  // Outer padding: 6 base units -> 6 * sRatio
-  const cardPad = 6 * sRatio;
+  // Outer padding: 4.5 base units -> 4.5 * sRatio
+  const cardPad = 4.5 * sRatio;
   const bx = cardPad;
   const by = cardPad;
   const bw = widthPx - 2 * cardPad;
@@ -144,9 +152,9 @@ export async function renderFrontCardToCanvas(
       );
       ctx.save();
       ctx.globalAlpha = template.watermarkOpacity || 0.16;
-      const wmSize = 175 * sRatio;
+      const wmSize = 145 * sRatio;
       const wmx = bx + (bw - wmSize) / 2;
-      const wmy = by + (bh - wmSize) / 2 + (isBottomPhoto ? 0 : 22 * sRatio);
+      const wmy = by + (bh - wmSize) / 2 + (isBottomPhoto ? 0 : 25 * sRatio);
       ctx.drawImage(emblemImg, wmx, wmy, wmSize, wmSize);
       ctx.restore();
     } catch (e) {
@@ -154,8 +162,8 @@ export async function renderFrontCardToCanvas(
     }
   }
 
-  // Active printable content bounds inside border (5 base units padding)
-  const innerPad = 5 * sRatio;
+  // Active printable content bounds inside border (4 base units padding)
+  const innerPad = 4 * sRatio;
   const cx = bx + innerPad;
   const cy = by + innerPad;
   const cw = bw - 2 * innerPad;
@@ -191,17 +199,17 @@ export async function renderFrontCardToCanvas(
 
     // 1. Country Headers (Centered)
     const fMoul1 = Math.round(12.5 * sRatio);
-    ctx.font = `normal ${fMoul1}px 'Moul', serif`;
+    ctx.font = `normal ${fMoul1}px ${FONT_MOUL}`;
     ctx.fillText(template.countryHeaderKm1, cx + cw / 2, curY);
 
-    curY += fMoul1 + 4.5 * sRatio;
-    const fMoul2 = Math.round(11.5 * sRatio);
-    ctx.font = `normal ${fMoul2}px 'Moul', serif`;
+    curY += fMoul1 + 3 * sRatio;
+    const fMoul2 = Math.round(11 * sRatio);
+    ctx.font = `normal ${fMoul2}px ${FONT_MOUL}`;
     ctx.fillText(template.countryHeaderKm2, cx + cw / 2, curY);
 
     // 2. Royal Flourish: ផ្នែកខាងក្រោមព្រះរាជា
-    curY += fMoul2 + 3.5 * sRatio;
-    const flourishW = 160 * sRatio;
+    curY += fMoul2 + 3 * sRatio;
+    const flourishW = 155 * sRatio;
     const flourishH = 17 * sRatio;
     try {
       const flImg = await loadImage(resolveFlourishUrl(template.flourishUrl));
@@ -222,12 +230,12 @@ export async function renderFrontCardToCanvas(
       ctx.stroke();
       ctx.restore();
     }
-    curY += flourishH + 4 * sRatio;
+    curY += flourishH + 3 * sRatio;
 
     // 3. Ministry Department & School Name (Logo vertically centered & level with the two lines)
-    const logoH = 24 * sRatio;
-    const logoW = Math.round(logoH * 0.77); // ~18.5 * sRatio
-    const logoY = curY + 0.5 * sRatio;
+    const logoH = 26 * sRatio;
+    const logoW = Math.round(logoH * 0.77); // ~20 * sRatio
+    const logoY = curY;
     try {
       const emblemImg = await loadImage(
         template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
@@ -240,12 +248,12 @@ export async function renderFrontCardToCanvas(
     const deptX = cx + logoW + 5 * sRatio;
     ctx.textAlign = 'left';
     const fDept = Math.round(10.5 * sRatio);
-    ctx.font = `bold ${fDept}px 'Battambang', sans-serif`;
+    ctx.font = `bold ${fDept}px ${FONT_BATTAMBANG}`;
     ctx.fillText(template.ministryDepartment, deptX, curY + 1 * sRatio);
 
-    const ySchool = curY + 13.5 * sRatio;
-    const fSchool = Math.round(10 * sRatio);
-    ctx.font = `bold ${fSchool}px 'Battambang', sans-serif`;
+    const ySchool = curY + 14 * sRatio;
+    const fSchool = Math.round(9.5 * sRatio);
+    ctx.font = `bold ${fSchool}px ${FONT_BATTAMBANG}`;
     ctx.fillText('អនុ/វិទ្យាល័យ', deptX, ySchool);
     const schoolLabelW = ctx.measureText('អនុ/វិទ្យាល័យ').width;
     const schoolLineX1 = deptX + schoolLabelW + 4 * sRatio;
@@ -257,17 +265,17 @@ export async function renderFrontCardToCanvas(
 
     if (displaySchoolName) {
       // NO DOTS when filled! BOLD font!
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
-      ctx.fillText(displaySchoolName, schoolLineX1, ySchool - 0.5 * sRatio);
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(displaySchoolName, schoolLineX1, ySchool);
     } else {
       drawDottedLine(ctx, schoolLineX1, ySchool + fSchool, schoolLineX2, blue, 1 * sRatio);
     }
 
-    // 4. Photo Box on Left: EXACT 3cm x 4cm (30mm x 40mm)
-    const photoW = Math.round((template.photoBoxWidthMm || 30) * scale);
-    const photoH = Math.round((template.photoBoxHeightMm || 40) * scale);
+    // 4. Photo Box on Left: exact 84 x 112 in 242-base (3:4 ratio, ~34.7% card width, matches original card)
+    const photoW = Math.round(84 * sRatio);
+    const photoH = Math.round(112 * sRatio);
     const photoX = cx;
-    const photoY = curY + logoH + 5 * sRatio;
+    const photoY = curY + logoH + 4 * sRatio;
 
     ctx.strokeStyle = blue;
     ctx.lineWidth = 1.2 * sRatio;
@@ -292,14 +300,14 @@ export async function renderFrontCardToCanvas(
     const rw = cx + cw - rx;
 
     // Title: អត្តសញ្ញាណប័ណ្ណសិស្ស
-    const fTitle = Math.round(13.5 * sRatio);
+    const fTitle = Math.round(13 * sRatio);
     ctx.textAlign = 'center';
-    ctx.font = `normal ${fTitle}px 'Moul', serif`;
-    ctx.fillText(template.cardTitleKm, rx + rw / 2, photoY + 1 * sRatio);
+    ctx.font = `normal ${fTitle}px ${FONT_MOUL}`;
+    ctx.fillText(template.cardTitleKm, rx + rw / 2, photoY);
 
     // Card Number / Prefix
-    const fNum = Math.round(10 * sRatio);
-    const yNum = photoY + fTitle + 5.5 * sRatio;
+    const fNum = Math.round(9.5 * sRatio);
+    const yNum = photoY + fTitle + 3 * sRatio;
     const cardNumText = student?.cardNumber
       ? toKhmerNumerals(student.cardNumber)
       : (student?.studentId ? toKhmerNumerals(student.studentId) : '');
@@ -307,24 +315,24 @@ export async function renderFrontCardToCanvas(
     ctx.textAlign = 'center';
     if (cardNumText) {
       const prefixText = `${template.cardNumberPrefix} `;
-      ctx.font = `normal ${fNum}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${fNum}px ${FONT_BATTAMBANG}`;
       const pW = ctx.measureText(prefixText).width;
-      ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       const vW = ctx.measureText(cardNumText).width;
       const startX = rx + (rw - (pW + vW)) / 2;
 
       ctx.textAlign = 'left';
-      ctx.font = `normal ${fNum}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${fNum}px ${FONT_BATTAMBANG}`;
       ctx.fillText(prefixText, startX, yNum);
-      ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
-      ctx.fillText(cardNumText, startX + pW, yNum - 0.5 * sRatio);
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(cardNumText, startX + pW, yNum);
     } else {
-      ctx.font = `normal ${fNum}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${fNum}px ${FONT_BATTAMBANG}`;
       ctx.fillText(`${template.cardNumberPrefix} ........................`, rx + rw / 2, yNum);
     }
 
     // Academic Year
-    const yYear = yNum + fNum + 4 * sRatio;
+    const yYear = yNum + fNum + 3 * sRatio;
     const yearText = student?.academicYear
       ? toKhmerNumerals(student.academicYear)
       : '';
@@ -332,112 +340,111 @@ export async function renderFrontCardToCanvas(
     ctx.textAlign = 'center';
     if (yearText) {
       const yPrefix = 'ឆ្នាំសិក្សា ';
-      ctx.font = `normal ${Math.round(9.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
       const ypW = ctx.measureText(yPrefix).width;
-      ctx.font = `bold ${Math.round(10 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       const yvW = ctx.measureText(yearText).width;
       const startYX = rx + (rw - (ypW + yvW)) / 2;
 
       ctx.textAlign = 'left';
-      ctx.font = `normal ${Math.round(9.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(yPrefix, startYX, yYear);
-      ctx.font = `bold ${Math.round(10 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(yearText, startYX + ypW, yYear);
     } else {
-      ctx.font = `normal ${Math.round(9.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(template.academicYearPrefix, rx + rw / 2, yYear);
     }
 
     // 3 rows beside photo: BOLD Important Fields & NO DOTS when filled
-    let rowCurY = yYear + fNum + 10 * sRatio;
-    const fField = Math.round(10 * sRatio);
+    let rowCurY = yYear + fNum + 6 * sRatio;
+    const fField = Math.round(9.5 * sRatio);
     ctx.textAlign = 'left';
 
     // Row 1: គោត្តនាម-នាមៈ
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('គោត្តនាម-នាមៈ', rx, rowCurY);
     const nW = ctx.measureText('គោត្តនាម-នាមៈ').width;
     const nX1 = rx + nW + 3 * sRatio;
     if (student?.nameKm) {
-      ctx.font = `bold ${Math.round(12.5 * sRatio)}px 'Battambang', sans-serif`;
-      ctx.fillText(student.nameKm, nX1 + 2 * sRatio, rowCurY - 1 * sRatio);
+      ctx.font = `bold ${Math.round(11 * sRatio)}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(student.nameKm, nX1 + 2 * sRatio, rowCurY);
     } else {
       drawDottedLine(ctx, nX1, rowCurY + fField, rx + rw, blue, 1 * sRatio);
     }
 
     // Row 2: ភេទ & សញ្ជាតិ (Col 2 aligned adaptively)
-    rowCurY += 16 * sRatio;
-    const col2X = rx + Math.max(rw * 0.44, 72 * sRatio);
+    rowCurY += 15 * sRatio;
+    const col2X = rx + Math.max(rw * 0.46, 68 * sRatio);
 
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ភេទ', rx, rowCurY);
     const gW = ctx.measureText('ភេទ').width;
     const gX1 = rx + gW + 3 * sRatio;
     if (student?.gender) {
-      ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(student.gender, gX1 + 2 * sRatio, rowCurY);
     } else {
-      drawDottedLine(ctx, gX1, rowCurY + fField, col2X - 6 * sRatio, blue, 1 * sRatio);
+      drawDottedLine(ctx, gX1, rowCurY + fField, col2X - 4 * sRatio, blue, 1 * sRatio);
     }
 
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('សញ្ជាតិ', col2X, rowCurY);
     const natW = ctx.measureText('សញ្ជាតិ').width;
     const natX1 = col2X + natW + 3 * sRatio;
     const natVal = student?.nationality || (student?.nameKm ? 'ខ្មែរ' : '');
     if (natVal) {
-      ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(natVal, natX1 + 2 * sRatio, rowCurY);
     } else {
       drawDottedLine(ctx, natX1, rowCurY + fField, rx + rw, blue, 1 * sRatio);
     }
 
     // Row 3: ថ្នាក់ទី & អត្តលេខៈ (Arabic Numerals for Class, Col 2 aligned at col2X)
-    rowCurY += 16 * sRatio;
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    rowCurY += 15 * sRatio;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ថ្នាក់ទី', rx, rowCurY);
     const cW = ctx.measureText('ថ្នាក់ទី').width;
     const cX1 = rx + cW + 3 * sRatio;
     const classVal = student?.class ? toArabicNumerals(student.class) : '';
     if (classVal) {
-      ctx.font = `bold ${Math.round(11.5 * sRatio)}px sans-serif`;
+      ctx.font = `bold ${Math.round(11 * sRatio)}px sans-serif`;
       ctx.fillText(classVal, cX1 + 2 * sRatio, rowCurY);
     } else {
-      drawDottedLine(ctx, cX1, rowCurY + fField, col2X - 6 * sRatio, blue, 1 * sRatio);
+      drawDottedLine(ctx, cX1, rowCurY + fField, col2X - 4 * sRatio, blue, 1 * sRatio);
     }
 
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('អត្តលេខៈ', col2X, rowCurY);
     const idW = ctx.measureText('អត្តលេខៈ').width;
     const idX1 = col2X + idW + 3 * sRatio;
     if (student?.studentId) {
-      ctx.font = `bold ${Math.round(11 * sRatio)}px sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px sans-serif`;
       ctx.fillText(student.studentId, idX1 + 2 * sRatio, rowCurY);
     } else {
       drawDottedLine(ctx, idX1, rowCurY + fField, rx + rw, blue, 1 * sRatio);
     }
 
     // 6. 5 Full Width Lines below Photo Box
-    // Comfortably spaced to eliminate dead bottom space while keeping elegant layout
-    let fullY = photoY + photoH + 11 * sRatio;
-    const lineGap = 21.5 * sRatio;
+    let fullY = photoY + photoH + 7 * sRatio;
+    const lineGap = 16.5 * sRatio;
 
     const drawFullLine = (
       label: string,
       value: string | undefined,
       isBoldVal = false,
       isArabicFont = false,
-      boldFontSize = 11
+      boldFontSize = 10.5
     ) => {
       ctx.textAlign = 'left';
-      ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+      ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
       ctx.fillText(label, cx, fullY);
       const lw = ctx.measureText(label).width;
       const lx1 = cx + lw + 4 * sRatio;
       const lx2 = cx + cw;
 
       if (value) {
-        const fontFam = isArabicFont ? 'sans-serif' : `'Battambang', sans-serif`;
+        const fontFam = isArabicFont ? 'sans-serif' : FONT_BATTAMBANG;
         ctx.font = `${isBoldVal ? 'bold' : 'normal'} ${Math.round(boldFontSize * sRatio)}px ${fontFam}`;
         ctx.fillText(value, lx1 + 2 * sRatio, fullY);
       } else {
@@ -448,34 +455,34 @@ export async function renderFrontCardToCanvas(
 
     // 1. ថ្ងៃខែឆ្នាំកំណើតៈ (Arabic Numerals & Bold)
     const dobVal = student?.dateOfBirth ? toArabicNumerals(student.dateOfBirth) : '';
-    drawFullLine('ថ្ងៃខែឆ្នាំកំណើតៈ', dobVal, true, true, 11.5);
+    drawFullLine('ថ្ងៃខែឆ្នាំកំណើតៈ', dobVal, true, true, 11);
 
     // 2. ទីកន្លែងកំណើតៈ
-    drawFullLine('ទីកន្លែងកំណើតៈ', student?.placeOfBirth, true, false, 10.5);
+    drawFullLine('ទីកន្លែងកំណើតៈ', student?.placeOfBirth, true, false, 10);
 
     // 3. ឪពុកឈ្មោះៈ & មុខរបរ (មុខរបរ shifted left, aligned adaptively)
-    const jobColX = cx + Math.max(cw * 0.50, 136 * sRatio);
+    const jobColX = cx + Math.max(cw * 0.52, 130 * sRatio);
 
     ctx.textAlign = 'left';
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ឪពុកឈ្មោះៈ', cx, fullY);
     const fLabelW = ctx.measureText('ឪពុកឈ្មោះៈ').width;
     const fL1 = cx + fLabelW + 4 * sRatio;
 
     if (student?.fatherName) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(student.fatherName, fL1 + 2 * sRatio, fullY);
     } else {
       drawDottedLine(ctx, fL1, fullY + fField, jobColX - 6 * sRatio, blue, 1 * sRatio);
     }
 
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('មុខរបរ', jobColX, fullY);
     const j1LabelW = ctx.measureText('មុខរបរ').width;
     const j1L1 = jobColX + j1LabelW + 4 * sRatio;
 
     if (student?.fatherOccupation) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(student.fatherOccupation, j1L1 + 2 * sRatio, fullY);
     } else {
       drawDottedLine(ctx, j1L1, fullY + fField, cx + cw, blue, 1 * sRatio);
@@ -483,25 +490,25 @@ export async function renderFrontCardToCanvas(
     fullY += lineGap;
 
     // 4. ម្តាយឈ្មោះៈ & មុខរបរ (មុខរបរ shifted left, aligned at jobColX)
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ម្តាយឈ្មោះៈ', cx, fullY);
     const mLabelW = ctx.measureText('ម្តាយឈ្មោះៈ').width;
     const mL1 = cx + mLabelW + 4 * sRatio;
 
     if (student?.motherName) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(student.motherName, mL1 + 2 * sRatio, fullY);
     } else {
       drawDottedLine(ctx, mL1, fullY + fField, jobColX - 6 * sRatio, blue, 1 * sRatio);
     }
 
-    ctx.font = `normal ${fField}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('មុខរបរ', jobColX, fullY);
     const j2LabelW = ctx.measureText('មុខរបរ').width;
     const j2L1 = jobColX + j2LabelW + 4 * sRatio;
 
     if (student?.motherOccupation) {
-      ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
+      ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
       ctx.fillText(student.motherOccupation, j2L1 + 2 * sRatio, fullY);
     } else {
       drawDottedLine(ctx, j2L1, fullY + fField, cx + cw, blue, 1 * sRatio);
@@ -509,28 +516,27 @@ export async function renderFrontCardToCanvas(
     fullY += lineGap;
 
     // 5. ទីលំនៅបច្ចុប្បន្នៈ
-    drawFullLine('ទីលំនៅបច្ចុប្បន្នៈ', student?.address, true, false, 10.5);
+    drawFullLine('ទីលំនៅបច្ចុប្បន្នៈ', student?.address, true, false, 10);
 
-    // 7. FOOTER SIGNATURES & NAMES AREA
-    // Anchored with ample writing space and names underneath
-    const yDate = fullY + 11 * sRatio;
-    const fFooter = Math.round(9.5 * sRatio);
+    // 7. FOOTER SIGNATURES & NAMES AREA (Matches original physical card)
+    const yDate = fullY + 6 * sRatio;
+    const fFooter = Math.round(9 * sRatio);
 
     // Left: Director Signature Block (កន្លែងសរសេរ & ឈ្មោះនាយកពីក្រោម)
-    const dirCenterX = cx + 70 * sRatio;
+    const dirCenterX = cx + 62 * sRatio;
     ctx.textAlign = 'center';
-    ctx.font = `normal ${fFooter}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${fFooter}px ${FONT_BATTAMBANG}`;
     ctx.fillText(template.issueDateLine, dirCenterX, yDate);
 
-    ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
-    ctx.fillText(template.directorTitle, dirCenterX, yDate + 16 * sRatio);
+    ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(template.directorTitle, dirCenterX, yDate + 13 * sRatio);
 
     // Dedicated signing line
     drawDottedLine(
       ctx,
-      dirCenterX - 45 * sRatio,
-      yDate + 44 * sRatio,
-      dirCenterX + 45 * sRatio,
+      dirCenterX - 42 * sRatio,
+      yDate + 36 * sRatio,
+      dirCenterX + 42 * sRatio,
       blue,
       0.8 * sRatio,
       2,
@@ -539,20 +545,20 @@ export async function renderFrontCardToCanvas(
 
     // Director name underneath
     const dirName = template.directorName || 'ជា សារ៉ា';
-    ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
-    ctx.fillText(dirName, dirCenterX, yDate + 56 * sRatio);
+    ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(dirName, dirCenterX, yDate + 47 * sRatio);
 
     // Right: Student Signature Block (កន្លែងសរសេរ & ឈ្មោះសិស្សពីក្រោម)
-    const stuCenterX = cx + cw - 65 * sRatio;
-    ctx.font = `medium ${Math.round(10 * sRatio)}px 'Battambang', sans-serif`;
-    ctx.fillText(template.signatureTitle, stuCenterX, yDate + 16 * sRatio);
+    const stuCenterX = cx + cw - 58 * sRatio;
+    ctx.font = `medium ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(template.signatureTitle, stuCenterX, yDate + 13 * sRatio);
 
     // Dedicated signing line
     drawDottedLine(
       ctx,
-      stuCenterX - 42 * sRatio,
-      yDate + 44 * sRatio,
-      stuCenterX + 42 * sRatio,
+      stuCenterX - 38 * sRatio,
+      yDate + 36 * sRatio,
+      stuCenterX + 38 * sRatio,
       blue,
       0.8 * sRatio,
       2,
@@ -561,8 +567,8 @@ export async function renderFrontCardToCanvas(
 
     // Student name underneath
     const stuName = student?.nameKm || '........................';
-    ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
-    ctx.fillText(stuName, stuCenterX, yDate + 56 * sRatio);
+    ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(stuName, stuCenterX, yDate + 47 * sRatio);
   }
 
   // ========================================================
@@ -572,12 +578,12 @@ export async function renderFrontCardToCanvas(
     let curY = cy + 2 * sRatio;
 
     const fMoul1 = Math.round(11 * sRatio);
-    ctx.font = `normal ${fMoul1}px 'Moul', serif`;
+    ctx.font = `normal ${fMoul1}px ${FONT_MOUL}`;
     ctx.fillText(template.countryHeaderKm1, cx + cw / 2, curY);
 
     curY += fMoul1 + 3.5 * sRatio;
     const fMoul2 = Math.round(10 * sRatio);
-    ctx.font = `normal ${fMoul2}px 'Moul', serif`;
+    ctx.font = `normal ${fMoul2}px ${FONT_MOUL}`;
     ctx.fillText(template.countryHeaderKm2, cx + cw / 2, curY);
 
     // Flourish divider
@@ -599,19 +605,19 @@ export async function renderFrontCardToCanvas(
     } catch (e) {}
 
     ctx.textAlign = 'left';
-    ctx.font = `bold ${Math.round(9.5 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(template.ministryDepartment, cx + cw / 2 - 56 * sRatio, curY + 6 * sRatio);
 
     // Title: ប័ណ្ណសម្គាល់ខ្លួនសិស្ស
     curY += logoH + 9 * sRatio;
     ctx.textAlign = 'center';
     const fTitle = Math.round(13.5 * sRatio);
-    ctx.font = `normal ${fTitle}px 'Moul', serif`;
+    ctx.font = `normal ${fTitle}px ${FONT_MOUL}`;
     ctx.fillText(template.cardTitleKm, cx + cw / 2, curY);
 
     // Year & Grade (Arabic for class)
     curY += fTitle + 3.5 * sRatio;
-    ctx.font = `normal ${Math.round(9 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
     const yearText = student?.academicYear
       ? `ឆ្នាំសិក្សា ${toKhmerNumerals(student.academicYear)}`
       : template.academicYearPrefix;
@@ -690,9 +696,9 @@ export async function renderFrontCardToCanvas(
     }
 
     // Bottom Photo & Signatures
-    // Bottom Left Photo: EXACT 3cm x 4cm (30mm x 40mm)
-    const photoW = Math.round((template.photoBoxWidthMm || 30) * scale);
-    const photoH = Math.round((template.photoBoxHeightMm || 40) * scale);
+    // Bottom Left Photo: exact 84 x 112 in 242-base (3:4 ratio)
+    const photoW = Math.round(84 * sRatio);
+    const photoH = Math.round(112 * sRatio);
     const photoX = cx;
     const photoY = by + bh - photoH - 6 * sRatio;
 
@@ -718,7 +724,7 @@ export async function renderFrontCardToCanvas(
     const sigX = photoX + photoW + 12 * sRatio;
     const sigW = cx + cw - sigX;
     ctx.textAlign = 'center';
-    ctx.font = `normal ${Math.round(9 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(
       template.studentDeclaration || `ជាសិស្ស ${template.schoolNameOnly || 'វិទ្យាល័យ អន្លង់វិល'}`,
       sigX + sigW / 2,
@@ -738,11 +744,11 @@ export async function renderFrontCardToCanvas(
       4
     );
 
-    ctx.font = `normal ${Math.round(11 * sRatio)}px 'Moul', serif`;
+    ctx.font = `normal ${Math.round(11 * sRatio)}px ${FONT_MOUL}`;
     ctx.fillText(template.directorTitle || 'នាយកសាលា', sigX + sigW / 2, photoY + photoH - 24 * sRatio);
 
     const dirName = template.directorName || 'ជា សារ៉ា';
-    ctx.font = `bold ${Math.round(10.5 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(dirName, sigX + sigW / 2, photoY + photoH - 8 * sRatio);
   }
 
@@ -840,7 +846,7 @@ async function renderLandscapeFrontCard(
   const cardIdText = student?.studentId || (student?.cardNumber ? toKhmerNumerals(student.cardNumber) : '');
   ctx.fillStyle = blue;
   ctx.textAlign = 'center';
-  ctx.font = `bold ${Math.round(10 * sRatio)}px 'Battambang', sans-serif`;
+  ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
   if (cardIdText) {
     ctx.fillText(`អត្តលេខៈ ${cardIdText}`, photoX + photoW / 2, photoY + photoH + 5 * sRatio);
   } else {
@@ -855,13 +861,13 @@ async function renderLandscapeFrontCard(
   // Header 1: ព្រះរាជាណាចក្រកម្ពុជា
   const fMoul1 = Math.round(10.5 * sRatio);
   ctx.textAlign = 'center';
-  ctx.font = `normal ${fMoul1}px 'Moul', serif`;
+  ctx.font = `normal ${fMoul1}px ${FONT_MOUL}`;
   ctx.fillText(template.countryHeaderKm1, rx + rw / 2, curY);
 
   // Header 2: ជាតិ សាសនា ព្រះមហាក្សត្រ
   curY += fMoul1 + 3 * sRatio;
   const fMoul2 = Math.round(9.5 * sRatio);
-  ctx.font = `normal ${fMoul2}px 'Moul', serif`;
+  ctx.font = `normal ${fMoul2}px ${FONT_MOUL}`;
   ctx.fillText(template.countryHeaderKm2, rx + rw / 2, curY);
 
   // Flourish / Divider
@@ -886,17 +892,17 @@ async function renderLandscapeFrontCard(
 
   const deptX = rx + logoW + 4 * sRatio;
   ctx.textAlign = 'left';
-  ctx.font = `bold ${Math.round(9 * sRatio)}px 'Battambang', sans-serif`;
+  ctx.font = `bold ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
   ctx.fillText(template.ministryDepartment, deptX, curY);
 
   const displaySchoolName = template.schoolNameOnly
     ? template.schoolNameOnly.replace(/^អនុ[\/\s]*វិទ្យាល័យ\s*/, '')
     : '';
-  ctx.font = `normal ${Math.round(8.5 * sRatio)}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${Math.round(8.5 * sRatio)}px ${FONT_BATTAMBANG}`;
   ctx.fillText('អនុ/វិទ្យាល័យ', deptX, curY + 11 * sRatio);
   const sLabelW = ctx.measureText('អនុ/វិទ្យាល័យ').width;
   if (displaySchoolName) {
-    ctx.font = `bold ${Math.round(9 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `bold ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(displaySchoolName, deptX + sLabelW + 3 * sRatio, curY + 11 * sRatio);
   }
   curY += logoH + 4 * sRatio;
@@ -904,7 +910,7 @@ async function renderLandscapeFrontCard(
   // Title: អត្តសញ្ញាណប័ណ្ណសិស្ស
   const fTitle = Math.round(11 * sRatio);
   ctx.textAlign = 'center';
-  ctx.font = `normal ${fTitle}px 'Moul', serif`;
+  ctx.font = `normal ${fTitle}px ${FONT_MOUL}`;
   ctx.fillText(template.cardTitleKm, rx + rw / 2, curY);
   curY += fTitle + 5 * sRatio;
 
@@ -914,11 +920,11 @@ async function renderLandscapeFrontCard(
   ctx.textAlign = 'left';
 
   // Row 1: គោត្តនាម-នាម
-  ctx.font = `normal ${fDetail}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fDetail}px ${FONT_BATTAMBANG}`;
   ctx.fillText('គោត្តនាម-នាមៈ', rx, curY);
   const nW = ctx.measureText('គោត្តនាម-នាមៈ').width;
   if (student?.nameKm) {
-    ctx.font = `bold ${Math.round(11 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `bold ${Math.round(11 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(student.nameKm, rx + nW + 4 * sRatio, curY - 0.5 * sRatio);
   } else {
     drawDottedLine(ctx, rx + nW + 4 * sRatio, curY + fDetail, rx + rw, blue, 1 * sRatio);
@@ -926,21 +932,21 @@ async function renderLandscapeFrontCard(
   curY += rowGap;
 
   // Row 2: ភេទ | សញ្ជាតិ | ថ្នាក់ទី
-  ctx.font = `normal ${fDetail}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fDetail}px ${FONT_BATTAMBANG}`;
   ctx.fillText('ភេទ', rx, curY);
   const gW = ctx.measureText('ភេទ').width;
-  ctx.font = `bold ${Math.round(9.5 * sRatio)}px 'Battambang', sans-serif`;
+  ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
   ctx.fillText(student?.gender || '...', rx + gW + 2 * sRatio, curY);
 
   const colNatX = rx + rw * 0.35;
-  ctx.font = `normal ${fDetail}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fDetail}px ${FONT_BATTAMBANG}`;
   ctx.fillText('សញ្ជាតិ', colNatX, curY);
   const natW = ctx.measureText('សញ្ជាតិ').width;
-  ctx.font = `bold ${Math.round(9.5 * sRatio)}px 'Battambang', sans-serif`;
+  ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
   ctx.fillText(student?.nationality || 'ខ្មែរ', colNatX + natW + 2 * sRatio, curY);
 
   const colClassX = rx + rw * 0.70;
-  ctx.font = `normal ${fDetail}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fDetail}px ${FONT_BATTAMBANG}`;
   ctx.fillText('ថ្នាក់ទី', colClassX, curY);
   const clW = ctx.measureText('ថ្នាក់ទី').width;
   ctx.font = `bold ${Math.round(10 * sRatio)}px sans-serif`;
@@ -949,7 +955,7 @@ async function renderLandscapeFrontCard(
 
   // Row 3: ថ្ងៃខែឆ្នាំកំណើត
   const dobVal = student?.dateOfBirth ? toArabicNumerals(student.dateOfBirth) : '';
-  ctx.font = `normal ${fDetail}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fDetail}px ${FONT_BATTAMBANG}`;
   ctx.fillText('ថ្ងៃខែឆ្នាំកំណើតៈ', rx, curY);
   const dW = ctx.measureText('ថ្ងៃខែឆ្នាំកំណើតៈ').width;
   if (dobVal) {
@@ -961,11 +967,11 @@ async function renderLandscapeFrontCard(
   curY += rowGap;
 
   // Row 4: ទីលំនៅបច្ចុប្បន្ន
-  ctx.font = `normal ${fDetail}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fDetail}px ${FONT_BATTAMBANG}`;
   ctx.fillText('ទីលំនៅៈ', rx, curY);
   const aW = ctx.measureText('ទីលំនៅៈ').width;
   if (student?.address) {
-    ctx.font = `normal ${Math.round(8.5 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `normal ${Math.round(8.5 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(student.address, rx + aW + 4 * sRatio, curY);
   } else {
     drawDottedLine(ctx, rx + aW + 4 * sRatio, curY + fDetail, rx + rw, blue, 1 * sRatio);
@@ -975,16 +981,16 @@ async function renderLandscapeFrontCard(
   // Footer: Signatures
   const fFoot = Math.round(8.5 * sRatio);
   ctx.textAlign = 'left';
-  ctx.font = `normal ${fFoot}px 'Battambang', sans-serif`;
+  ctx.font = `normal ${fFoot}px ${FONT_BATTAMBANG}`;
   ctx.fillText(`${template.issueDateLine || 'ថ្ងៃទី...ខែ...ឆ្នាំ២០...'}`, rx, curY);
-  ctx.font = `bold ${Math.round(9 * sRatio)}px 'Battambang', sans-serif`;
+  ctx.font = `bold ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
   ctx.fillText(`${template.directorTitle || 'នាយក'}: ${template.directorName || 'ជា សារ៉ា'}`, rx, curY + 11 * sRatio);
 
   ctx.textAlign = 'right';
-  ctx.font = `medium ${fFoot}px 'Battambang', sans-serif`;
+  ctx.font = `medium ${fFoot}px ${FONT_BATTAMBANG}`;
   ctx.fillText(template.signatureTitle || 'ហត្ថលេខាសាមីខ្លួន', rx + rw, curY);
   if (student?.nameKm) {
-    ctx.font = `bold ${Math.round(9 * sRatio)}px 'Battambang', sans-serif`;
+    ctx.font = `bold ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(student.nameKm, rx + rw, curY + 11 * sRatio);
   }
 }
