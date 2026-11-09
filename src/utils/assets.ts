@@ -1,6 +1,16 @@
 import { MOEYS_EMBLEM_DATA_URI } from './moeysEmblemDataUri';
+import {
+  DEFAULT_FLOURISH_DATA_URI,
+  resolveFlourishUrl,
+  FLOURISH_DATA_URIS,
+} from './flourishDataUris';
 
-export { MOEYS_EMBLEM_DATA_URI };
+export {
+  MOEYS_EMBLEM_DATA_URI,
+  DEFAULT_FLOURISH_DATA_URI,
+  resolveFlourishUrl,
+  FLOURISH_DATA_URIS,
+};
 
 /**
  * Asset URL Resolver for GitHub Pages & Offline PWA
@@ -36,5 +46,5 @@ export function getMoeysEmblemUrl(): string {
 }
 
 export function getDefaultFlourishUrl(): string {
-  return getAssetUrl(DEFAULT_FLOURISH_PATH);
+  return DEFAULT_FLOURISH_DATA_URI;
 }

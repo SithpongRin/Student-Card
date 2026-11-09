@@ -1,7 +1,14 @@
 import { Student } from '../types/student';
 import { CardTemplate } from '../types/template';
 import { toKhmerNumerals, toArabicNumerals } from '../utils/khmerNumerals';
-import { MOEYS_EMBLEM_DATA_URI, getAssetUrl, getDefaultFlourishUrl } from '../utils/assets';
+import {
+  MOEYS_EMBLEM_DATA_URI,
+  getMoeysEmblemUrl,
+  getAssetUrl,
+  getDefaultFlourishUrl,
+  resolveFlourishUrl,
+  DEFAULT_FLOURISH_DATA_URI,
+} from '../utils/assets';
 
 export const DPI_300 = 300;
 export const MM_TO_PX_300 = 300 / 25.4; // ~11.811 pixels per mm
@@ -29,6 +36,8 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
     img.onerror = () => {
       if (resolvedSrc.includes('moeys_emblem.svg') && resolvedSrc !== MOEYS_EMBLEM_DATA_URI) {
         loadImage(MOEYS_EMBLEM_DATA_URI).then(resolve).catch(reject);
+      } else if (resolvedSrc.includes('flourish') && resolvedSrc !== DEFAULT_FLOURISH_DATA_URI) {
+        loadImage(DEFAULT_FLOURISH_DATA_URI).then(resolve).catch(reject);
       } else {
         reject(new Error(`Failed to load image: ${resolvedSrc}`));
       }
@@ -195,7 +204,7 @@ export async function renderFrontCardToCanvas(
     const flourishW = 160 * sRatio;
     const flourishH = 17 * sRatio;
     try {
-      const flImg = await loadImage(template.flourishUrl || getDefaultFlourishUrl());
+      const flImg = await loadImage(resolveFlourishUrl(template.flourishUrl));
       ctx.drawImage(flImg, cx + (cw - flourishW) / 2, curY, flourishW, flourishH);
     } catch (e) {
       // Fallback flourish divider
@@ -860,7 +869,7 @@ async function renderLandscapeFrontCard(
   const flW = Math.min(130 * sRatio, rw * 0.75);
   const flH = 10 * sRatio;
   try {
-    const flImg = await loadImage(template.flourishUrl || getDefaultFlourishUrl());
+    const flImg = await loadImage(resolveFlourishUrl(template.flourishUrl));
     ctx.drawImage(flImg, rx + (rw - flW) / 2, curY, flW, flH);
   } catch (e) {
     drawDottedLine(ctx, rx + rw * 0.25, curY + 4 * sRatio, rx + rw * 0.75, blue, 1 * sRatio);
@@ -871,7 +880,7 @@ async function renderLandscapeFrontCard(
   const logoH = 22 * sRatio;
   const logoW = Math.round(logoH * 0.77);
   try {
-    const emblemImg = await loadImage(template.emblemUrl || '/images/moeys_emblem.svg');
+    const emblemImg = await loadImage(template.emblemUrl || getMoeysEmblemUrl());
     ctx.drawImage(emblemImg, rx, curY, logoW, logoH);
   } catch (e) {}
 

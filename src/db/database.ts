@@ -9,7 +9,11 @@ import {
 } from './defaultTemplates';
 import { initialSeedStudents } from './seedData';
 import { PrintSettings } from '../types/print';
-import { MOEYS_EMBLEM_DATA_URI } from '../utils/assets';
+import {
+  MOEYS_EMBLEM_DATA_URI,
+  DEFAULT_FLOURISH_DATA_URI,
+  resolveFlourishUrl,
+} from '../utils/assets';
 
 export interface SchoolClass {
   id?: number;
@@ -104,7 +108,7 @@ export async function initializeDatabase() {
       await db.templates.update(TEMPLATE_1_ID, {
         schoolNameOnly: existingRef1.schoolNameOnly || defaultReferenceTemplate.schoolNameOnly,
         directorName: existingRef1.directorName || defaultReferenceTemplate.directorName,
-        flourishUrl: existingRef1.flourishUrl || defaultReferenceTemplate.flourishUrl,
+        flourishUrl: resolveFlourishUrl(existingRef1.flourishUrl),
         emblemUrl: MOEYS_EMBLEM_DATA_URI,
         photoBoxWidthMm: 30,
         photoBoxHeightMm: 40,
@@ -118,7 +122,7 @@ export async function initializeDatabase() {
       await db.templates.update(TEMPLATE_2_ID, {
         schoolNameOnly: existingRef2.schoolNameOnly || templateBattambangBottomPhoto.schoolNameOnly,
         directorName: existingRef2.directorName || templateBattambangBottomPhoto.directorName,
-        flourishUrl: existingRef2.flourishUrl || templateBattambangBottomPhoto.flourishUrl,
+        flourishUrl: resolveFlourishUrl(existingRef2.flourishUrl),
         emblemUrl: MOEYS_EMBLEM_DATA_URI,
         studentDeclaration: existingRef2.studentDeclaration || templateBattambangBottomPhoto.studentDeclaration,
         photoBoxWidthMm: 30,

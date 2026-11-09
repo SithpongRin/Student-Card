@@ -14,6 +14,7 @@ import {
   templateBattambangBottomPhoto,
 } from '../../db/defaultTemplates';
 import { CARD_SIZE_PRESETS } from '../../utils/cardSizes';
+import { resolveFlourishUrl } from '../../utils/assets';
 import {
   RotateCcw,
   Save,
@@ -302,14 +303,14 @@ export const TemplateDesigner: React.FC = () => {
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {[
-                      { id: '1', url: '/images/flourishes/flourish_1_blue.png', label: 'ក្បាច់ទី១ (Royal Floral with Dots)' },
-                      { id: '2', url: '/images/flourishes/flourish_2_blue.png', label: 'ក្បាច់ទី២ (Calligraphic Scroll)' },
-                      { id: '3', url: '/images/flourishes/flourish_3_blue.png', label: 'ក្បាច់ទី៣ (Ribbon Rose Scroll)' },
-                      { id: '4', url: '/images/flourishes/flourish_4_blue.png', label: 'ក្បាច់ទី៤ (Floral Star Wave)' },
-                      { id: '5', url: '/images/flourishes/flourish_5_blue.png', label: 'ក្បាច់ទី៥ (Khmer Royal Crest)' },
+                      { id: '1', url: resolveFlourishUrl('1'), label: 'ក្បាច់ទី១ (Royal Floral with Dots)' },
+                      { id: '2', url: resolveFlourishUrl('2'), label: 'ក្បាច់ទី២ (Calligraphic Scroll)' },
+                      { id: '3', url: resolveFlourishUrl('3'), label: 'ក្បាច់ទី៣ (Ribbon Rose Scroll)' },
+                      { id: '4', url: resolveFlourishUrl('4'), label: 'ក្បាច់ទី៤ (Floral Star Wave)' },
+                      { id: '5', url: resolveFlourishUrl('5'), label: 'ក្បាច់ទី៥ (Khmer Royal Crest)' },
                     ].map((f) => {
                       const isSelected =
-                        (currentTemplate.flourishUrl || '/images/flourishes/flourish_1_blue.png') === f.url;
+                        resolveFlourishUrl(currentTemplate.flourishUrl) === f.url;
                       return (
                         <button
                           key={f.id}
@@ -328,7 +329,7 @@ export const TemplateDesigner: React.FC = () => {
                             <div className="h-6 flex items-center justify-center bg-white rounded-lg p-1 border border-black/[0.04]">
                               <img
                                 src={f.url}
-                                alt={f.label}
+                                alt=""
                                 className="max-h-full max-w-full object-contain"
                               />
                             </div>

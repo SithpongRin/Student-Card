@@ -2,7 +2,12 @@ import React from 'react';
 import { Student } from '../../types/student';
 import { CardTemplate } from '../../types/template';
 import { toKhmerNumerals, toArabicNumerals } from '../../utils/khmerNumerals';
-import { MOEYS_EMBLEM_DATA_URI, getAssetUrl, getDefaultFlourishUrl } from '../../utils/assets';
+import {
+  MOEYS_EMBLEM_DATA_URI,
+  getMoeysEmblemUrl,
+  resolveFlourishUrl,
+  DEFAULT_FLOURISH_DATA_URI,
+} from '../../utils/assets';
 
 interface StudentCardFrontProps {
   student?: Partial<Student>;
@@ -35,12 +40,12 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
     ? template.schoolNameOnly.replace(/^អនុ[\/\s]*វិទ្យាល័យ\s*/, '')
     : '';
 
-  // Safe Emblem & Flourish Sources (Embedded Data URI fallback ensures logo NEVER disappears)
+  // Safe Emblem & Flourish Sources (Embedded Data URIs ensure logo and flourish NEVER disappear)
   const emblemSource =
     template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg') && (template.emblemUrl.startsWith('data:') || template.emblemUrl.startsWith('http'))
       ? template.emblemUrl
       : MOEYS_EMBLEM_DATA_URI;
-  const flourishSource = getAssetUrl(template.flourishUrl) || getDefaultFlourishUrl();
+  const flourishSource = resolveFlourishUrl(template.flourishUrl);
 
   // Format student details: Class and Date of Birth must be written in Arabic numerals
   const nameKm = student?.nameKm || '';
@@ -285,11 +290,14 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 </div>
 
                 {/* Flourish: ផ្នែកខាងក្រោមព្រះរាជា */}
-                <div className="flex items-center justify-center my-[2px]">
+                <div className="flex items-center justify-center my-[2px] h-[17px]">
                   <img
                     src={flourishSource}
-                    alt="Flourish"
+                    alt=""
                     className="w-[155px] h-[17px] object-contain opacity-95"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = DEFAULT_FLOURISH_DATA_URI;
+                    }}
                   />
                 </div>
 

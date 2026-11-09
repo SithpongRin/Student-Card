@@ -1,5 +1,5 @@
 import { CardTemplate } from '../types/template';
-import { MOEYS_EMBLEM_DATA_URI } from '../utils/assets';
+import { MOEYS_EMBLEM_DATA_URI, DEFAULT_FLOURISH_DATA_URI } from '../utils/assets';
 
 export const TEMPLATE_1_ID = 'template-reference-moeys-default';
 export const TEMPLATE_2_ID = 'template-battambang-bottom-photo';
@@ -48,7 +48,7 @@ export const defaultReferenceTemplate: CardTemplate = {
   innerPaddingMm: 2.8,
 
   emblemUrl: MOEYS_EMBLEM_DATA_URI,
-  flourishUrl: '/images/flourishes/flourish_1_blue.png',
+  flourishUrl: DEFAULT_FLOURISH_DATA_URI,
   updatedAt: Date.now(),
 };
 
@@ -96,7 +96,7 @@ export const templateBattambangBottomPhoto: CardTemplate = {
   innerPaddingMm: 2.8,
 
   emblemUrl: MOEYS_EMBLEM_DATA_URI,
-  flourishUrl: '/images/flourishes/flourish_1_blue.png',
+  flourishUrl: DEFAULT_FLOURISH_DATA_URI,
   updatedAt: Date.now(),
 };
 
