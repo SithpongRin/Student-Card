@@ -39,4 +39,15 @@ describe('Card Sizes & A4 Grid Layout', () => {
     // Crucial check: 5 * 54 = 270mm <= 297mm paper height
     expect(layout.rows * 54).toBeLessThanOrEqual(297);
   });
+
+  it('calculates 2x2=4 cards for 95x135mm on A4 sheet', () => {
+    const layout = calculateA4GridLayout(95, 135, 210, 297, 4);
+    expect(layout.cols).toBe(2);
+    expect(layout.rows).toBe(2);
+    expect(layout.cardsPerPage).toBe(4);
+    expect(layout.marginLeftMm).toBe(10);
+    expect(layout.marginTopMm).toBe(13.5);
+    expect(layout.cols * 95).toBeLessThanOrEqual(210);
+    expect(layout.rows * 135).toBeLessThanOrEqual(297);
+  });
 });

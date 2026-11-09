@@ -2,6 +2,7 @@ import React from 'react';
 import { Student } from '../../types/student';
 import { CardTemplate } from '../../types/template';
 import { toKhmerNumerals, toArabicNumerals } from '../../utils/khmerNumerals';
+import { MOEYS_EMBLEM_DATA_URI, getAssetUrl, getDefaultFlourishUrl } from '../../utils/assets';
 
 interface StudentCardFrontProps {
   student?: Partial<Student>;
@@ -33,6 +34,13 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
   const displaySchoolName = template.schoolNameOnly
     ? template.schoolNameOnly.replace(/^អនុ[\/\s]*វិទ្យាល័យ\s*/, '')
     : '';
+
+  // Safe Emblem & Flourish Sources (Embedded Data URI fallback ensures logo NEVER disappears)
+  const emblemSource =
+    template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg') && (template.emblemUrl.startsWith('data:') || template.emblemUrl.startsWith('http'))
+      ? template.emblemUrl
+      : MOEYS_EMBLEM_DATA_URI;
+  const flourishSource = getAssetUrl(template.flourishUrl) || getDefaultFlourishUrl();
 
   // Format student details: Class and Date of Birth must be written in Arabic numerals
   const nameKm = student?.nameKm || '';
@@ -91,7 +99,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
               }}
             >
               <img
-                src={template.emblemUrl || '/images/moeys_emblem.svg'}
+                src={emblemSource}
                 alt="MoEYS Watermark"
                 className="w-[170px] h-[170px] object-contain"
               />
@@ -157,7 +165,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   {/* Ministry & School */}
                   <div className="flex items-center gap-1.5 mt-1 text-left">
                     <img
-                      src={template.emblemUrl || '/images/moeys_emblem.svg'}
+                      src={emblemSource}
                       alt="MoEYS Emblem"
                       className="w-[16px] h-[20px] object-contain shrink-0"
                     />
@@ -279,7 +287,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 {/* Flourish: ផ្នែកខាងក្រោមព្រះរាជា */}
                 <div className="flex items-center justify-center my-[2px]">
                   <img
-                    src={template.flourishUrl || '/images/flourishes/flourish_1_blue.png'}
+                    src={flourishSource}
                     alt="Flourish"
                     className="w-[155px] h-[17px] object-contain opacity-95"
                   />
@@ -288,7 +296,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 {/* Ministry & School (Logo centered & level with the two lines) */}
                 <div className="flex items-center gap-1.5 mt-[2px] text-left">
                   <img
-                    src={template.emblemUrl || '/images/moeys_emblem.svg'}
+                    src={emblemSource}
                     alt="MoEYS Emblem"
                     className="w-[20px] h-[27px] object-contain shrink-0"
                   />
@@ -601,7 +609,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
 
                 <div className="flex items-center justify-center gap-2 mt-[2px]">
                   <img
-                    src={template.emblemUrl || '/images/moeys_emblem.svg'}
+                    src={emblemSource}
                     alt="MoEYS Emblem"
                     className="w-[24px] h-[28px] object-contain shrink-0"
                   />

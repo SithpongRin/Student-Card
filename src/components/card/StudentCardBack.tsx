@@ -1,5 +1,6 @@
 import React from 'react';
 import { CardTemplate } from '../../types/template';
+import { MOEYS_EMBLEM_DATA_URI } from '../../utils/assets';
 
 interface StudentCardBackProps {
   template: CardTemplate;
@@ -44,7 +45,11 @@ export const StudentCardBack: React.FC<StudentCardBackProps> = ({
         {template.showBackEmblem && (
           <div className="flex items-center justify-center p-4">
             <img
-              src={template.emblemUrl || '/images/moeys_emblem.svg'}
+              src={
+                template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg') && (template.emblemUrl.startsWith('data:') || template.emblemUrl.startsWith('http'))
+                  ? template.emblemUrl
+                  : MOEYS_EMBLEM_DATA_URI
+              }
               alt="Ministry of Education, Youth and Sport Emblem (Cambodia)"
               style={{
                 width: `${emblemSizePx}px`,

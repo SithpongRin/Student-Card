@@ -11,6 +11,7 @@ import { CardGenerateView } from './components/generate/CardGenerateView';
 import { PdfExportView } from './components/print/PdfExportView';
 import { BackupRestoreView } from './components/backup/BackupRestoreView';
 import { SettingsView } from './components/settings/SettingsView';
+import { MOEYS_EMBLEM_DATA_URI } from './utils/assets';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -28,7 +29,7 @@ export const App: React.FC = () => {
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#f5f5f7]">
         <div className="w-16 h-16 rounded-3xl bg-white shadow-md p-3 flex items-center justify-center mb-4 border border-black/[0.04] animate-pulse">
           <img
-            src="/images/moeys_emblem.svg"
+            src={MOEYS_EMBLEM_DATA_URI}
             alt="MoEYS Logo"
             className="w-full h-full object-contain"
           />

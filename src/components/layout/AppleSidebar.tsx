@@ -13,6 +13,7 @@ import {
   Code2,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { MOEYS_EMBLEM_DATA_URI } from '../../utils/assets';
 
 interface NavItem {
   id: ActiveView;
@@ -85,7 +86,7 @@ export const AppleSidebar: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-black/[0.04] flex items-center justify-center p-1.5 overflow-hidden">
               <img
-                src="/images/moeys_emblem.svg"
+                src={MOEYS_EMBLEM_DATA_URI}
                 alt="MoEYS Emblem"
                 className="w-full h-full object-contain"
               />

@@ -102,7 +102,8 @@ export async function generateStudentCardsPdf(
     cardWidthMm,
     cardHeightMm,
     settings.paperWidthMm || 210,
-    settings.paperHeightMm || 297
+    settings.paperHeightMm || 297,
+    settings.cardsPerPage
   );
 
   const cols = settings.gridColumns || defaultGrid.cols;

@@ -454,11 +454,63 @@ export const TemplateDesigner: React.FC = () => {
             {/* TAB 4: DIMENSIONS, PHOTO BOX & COLOR */}
             {activeTab === 'dimensions' && (
               <div className="space-y-5 text-xs font-battambang">
-                {/* 1. Card Size Presets */}
+                {/* 1. Quick Sheet Layout Switcher (9 on A4 vs 4 on A4) */}
+                <div className="p-3 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/60 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-[#163d7e]">
+                      ប្លង់បោះពុម្ពលើក្រដាស A4 (A4 Sheet Layout):
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardDimensions(64, 92);
+                        addToast({
+                          type: 'info',
+                          title: 'បានជ្រើសរើស ៩ កាតលើ A4',
+                          message: 'ទំហំស្តង់ដារ MoEYS ៦៤ × ៩២ mm (៣ ជួរ × ៣ ជួរ = ៩ កាត)',
+                        });
+                      }}
+                      className={`p-2.5 rounded-lg border text-left transition-all ${
+                        currentTemplate.cardWidthMm === 64 && currentTemplate.cardHeightMm === 92
+                          ? 'border-[#0071e3] bg-white shadow-sm ring-2 ring-[#0071e3]/20'
+                          : 'border-blue-200 bg-white/70 hover:bg-white'
+                      }`}
+                    >
+                      <div className="font-bold text-xs text-[#1d1d1f]">១ សន្លឹក ៩ កាត</div>
+                      <div className="text-[10px] text-[#0071e3] font-sans font-semibold">64 × 92 mm (3×3)</div>
+                      <div className="text-[9.5px] text-[#86868b] mt-0.5">គំរូដើមក្រសួង សន្សំក្រដាស</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardDimensions(95, 135);
+                        addToast({
+                          type: 'info',
+                          title: 'បានជ្រើសរើស ៤ កាតលើ A4',
+                          message: 'ខ្នាតធំ ៩៥ × ១៣៥ mm (២ ជួរ × ២ ជួរ = ៤ កាត)',
+                        });
+                      }}
+                      className={`p-2.5 rounded-lg border text-left transition-all ${
+                        currentTemplate.cardWidthMm === 95 && currentTemplate.cardHeightMm === 135
+                          ? 'border-[#0071e3] bg-white shadow-sm ring-2 ring-[#0071e3]/20'
+                          : 'border-blue-200 bg-white/70 hover:bg-white'
+                      }`}
+                    >
+                      <div className="font-bold text-xs text-[#1d1d1f]">១ សន្លឹក ៤ កាត</div>
+                      <div className="text-[10px] text-[#0071e3] font-sans font-semibold">95 × 135 mm (2×2)</div>
+                      <div className="text-[9.5px] text-[#86868b] mt-0.5">ខ្នាតធំច្បាស់ បិទរូប 3x4 ទូលាយ</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Card Size Presets */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-semibold text-[#1d1d1f] flex items-center gap-1.5">
-                      <span>ទំហំខ្នាតកាតសិស្ស (Card Dimensions)</span>
+                      <span>ទំហំខ្នាតកាតសិស្សលម្អិត (All Size Presets)</span>
                       <AppleBadge variant="blue" size="sm">
                         {currentTemplate.cardWidthMm} × {currentTemplate.cardHeightMm} mm
                       </AppleBadge>

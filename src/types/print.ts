@@ -6,9 +6,9 @@ export interface PrintSettings {
   paperWidthMm: number; // 210 mm
   paperHeightMm: number; // 297 mm
 
-  gridColumns: 3;
-  gridRows: 3;
-  cardsPerPage: 9;
+  gridColumns: number; // 3 (for 9 cards) or 2 (for 4 cards)
+  gridRows: number; // 3 (for 9 cards) or 2 (for 4 cards)
+  cardsPerPage: number; // 9 or 4
 
   cardWidthMm: number; // 64 mm
   cardHeightMm: number; // 92 mm

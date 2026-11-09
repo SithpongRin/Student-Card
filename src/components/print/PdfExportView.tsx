@@ -279,6 +279,42 @@ export const PdfExportView: React.FC = () => {
       {/* Print Controls Bar & Template Switcher */}
       <AppleCard className="p-4" noPadding>
         <div className="p-4 flex flex-wrap items-center justify-between gap-6">
+          {/* A4 Sheet Layout: 9 Cards vs 4 Cards */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[#86868b] uppercase">ប្លង់លើ A4:</span>
+            <AppleSegmentedControl
+              size="sm"
+              options={[
+                { value: '9', label: '១ សន្លឹក ៩ កាត (3×3)' },
+                { value: '4', label: '១ សន្លឹក ៤ កាត (2×2)' },
+              ]}
+              value={printSettings.cardsPerPage === 4 ? '4' : '9'}
+              onChange={(v) => {
+                if (v === '4') {
+                  setCardDimensions(95, 135);
+                  updatePrintSetting('cardsPerPage', 4);
+                  updatePrintSetting('gridColumns', 2);
+                  updatePrintSetting('gridRows', 2);
+                  addToast({
+                    type: 'info',
+                    title: 'ប្លង់ ១ សន្លឹក ៤ កាត',
+                    message: 'បានកំណត់ទំហំ ៩៥ × ១៣៥ mm (៤ កាតលើ A4 ខ្នាតធំច្បាស់)',
+                  });
+                } else {
+                  setCardDimensions(64, 92);
+                  updatePrintSetting('cardsPerPage', 9);
+                  updatePrintSetting('gridColumns', 3);
+                  updatePrintSetting('gridRows', 3);
+                  addToast({
+                    type: 'info',
+                    title: 'ប្លង់ ១ សន្លឹក ៩ កាត',
+                    message: 'បានកំណត់ទំហំ ៦៤ × ៩២ mm (៩ កាតលើ A4 គំរូដើមក្រសួង)',
+                  });
+                }
+              }}
+            />
+          </div>
+
           {/* Template Switcher */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#86868b] uppercase">គំរូកាត:</span>
@@ -304,12 +340,22 @@ export const PdfExportView: React.FC = () => {
               onChange={(e) => {
                 const [w, h] = e.target.value.split('x').map(Number);
                 setCardDimensions(w, h);
+                if (w >= 90 || h >= 120) {
+                  updatePrintSetting('cardsPerPage', 4);
+                  updatePrintSetting('gridColumns', 2);
+                  updatePrintSetting('gridRows', 2);
+                } else {
+                  updatePrintSetting('cardsPerPage', 9);
+                  updatePrintSetting('gridColumns', 3);
+                  updatePrintSetting('gridRows', 3);
+                }
               }}
               className="px-3 py-1.5 rounded-full text-xs bg-[#f5f5f7] border border-black/[0.06] font-semibold text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]"
             >
-              <option value="54x86">54 × 86 mm (CR80 / ATM បញ្ឈរ)</option>
+              <option value="64x92">64 × 92 mm (MoEYS ៩ កាតលើ A4)</option>
+              <option value="95x135">95 × 135 mm (ខ្នាតធំ ៤ កាតលើ A4)</option>
               <option value="86x54">86 × 54 mm (CR80 / ATM ផ្ដេក)</option>
-              <option value="64x92">64 × 92 mm (MoEYS គំរូដើម)</option>
+              <option value="54x86">54 × 86 mm (CR80 / ATM បញ្ឈរ)</option>
               <option value="65x95">65 × 95 mm (Pouch អ៊ុតផ្លាស្ទិក)</option>
               <option value="70x100">70 × 100 mm (B7 ខ្នាតធំ)</option>
               <option value="74x105">74 × 105 mm (A7)</option>

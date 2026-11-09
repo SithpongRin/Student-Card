@@ -1,6 +1,7 @@
 import { Student } from '../types/student';
 import { CardTemplate } from '../types/template';
 import { toKhmerNumerals, toArabicNumerals } from '../utils/khmerNumerals';
+import { MOEYS_EMBLEM_DATA_URI, getAssetUrl, getDefaultFlourishUrl } from '../utils/assets';
 
 export const DPI_300 = 300;
 export const MM_TO_PX_300 = 300 / 25.4; // ~11.811 pixels per mm
@@ -14,18 +15,25 @@ export interface RenderCardOptions {
 const imageCache: Record<string, HTMLImageElement> = {};
 
 export async function loadImage(src: string): Promise<HTMLImageElement> {
-  if (imageCache[src]) {
-    return imageCache[src];
+  const resolvedSrc = getAssetUrl(src);
+  if (imageCache[resolvedSrc]) {
+    return imageCache[resolvedSrc];
   }
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      imageCache[src] = img;
+      imageCache[resolvedSrc] = img;
       resolve(img);
     };
-    img.onerror = (e) => reject(e);
-    img.src = src;
+    img.onerror = () => {
+      if (resolvedSrc.includes('moeys_emblem.svg') && resolvedSrc !== MOEYS_EMBLEM_DATA_URI) {
+        loadImage(MOEYS_EMBLEM_DATA_URI).then(resolve).catch(reject);
+      } else {
+        reject(new Error(`Failed to load image: ${resolvedSrc}`));
+      }
+    };
+    img.src = resolvedSrc;
   });
 }
 
@@ -120,7 +128,11 @@ export async function renderFrontCardToCanvas(
   // 2. Draw Watermark Emblem
   if (template.showWatermark) {
     try {
-      const emblemImg = await loadImage(template.emblemUrl || '/images/moeys_emblem.svg');
+      const emblemImg = await loadImage(
+        template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
+          ? template.emblemUrl
+          : MOEYS_EMBLEM_DATA_URI
+      );
       ctx.save();
       ctx.globalAlpha = template.watermarkOpacity || 0.16;
       const wmSize = 175 * sRatio;
@@ -183,7 +195,7 @@ export async function renderFrontCardToCanvas(
     const flourishW = 160 * sRatio;
     const flourishH = 17 * sRatio;
     try {
-      const flImg = await loadImage(template.flourishUrl || '/images/flourishes/flourish_1_blue.png');
+      const flImg = await loadImage(template.flourishUrl || getDefaultFlourishUrl());
       ctx.drawImage(flImg, cx + (cw - flourishW) / 2, curY, flourishW, flourishH);
     } catch (e) {
       // Fallback flourish divider
@@ -208,7 +220,11 @@ export async function renderFrontCardToCanvas(
     const logoW = Math.round(logoH * 0.77); // ~18.5 * sRatio
     const logoY = curY + 0.5 * sRatio;
     try {
-      const emblemImg = await loadImage(template.emblemUrl || '/images/moeys_emblem.svg');
+      const emblemImg = await loadImage(
+        template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
+          ? template.emblemUrl
+          : MOEYS_EMBLEM_DATA_URI
+      );
       ctx.drawImage(emblemImg, cx, logoY, logoW, logoH);
     } catch (e) {}
 
@@ -565,7 +581,11 @@ export async function renderFrontCardToCanvas(
     const logoW = 22 * sRatio;
     const logoH = 26 * sRatio;
     try {
-      const emblemImg = await loadImage(template.emblemUrl || '/images/moeys_emblem.svg');
+      const emblemImg = await loadImage(
+        template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
+          ? template.emblemUrl
+          : MOEYS_EMBLEM_DATA_URI
+      );
       ctx.drawImage(emblemImg, cx + cw / 2 - 82 * sRatio, curY, logoW, logoH);
     } catch (e) {}
 
@@ -748,7 +768,11 @@ export async function renderBackCardToCanvas(
 
   if (template.showBackEmblem) {
     try {
-      const emblemImg = await loadImage(template.emblemUrl || '/images/moeys_emblem.svg');
+      const emblemImg = await loadImage(
+        template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
+          ? template.emblemUrl
+          : MOEYS_EMBLEM_DATA_URI
+      );
       const sizePercent = (template.backEmblemSizePercent || 52) / 100;
       const emblemW = widthPx * sizePercent;
       const emblemH = emblemW * 1.15;
@@ -836,7 +860,7 @@ async function renderLandscapeFrontCard(
   const flW = Math.min(130 * sRatio, rw * 0.75);
   const flH = 10 * sRatio;
   try {
-    const flImg = await loadImage(template.flourishUrl || '/images/flourishes/flourish_1_blue.png');
+    const flImg = await loadImage(template.flourishUrl || getDefaultFlourishUrl());
     ctx.drawImage(flImg, rx + (rw - flW) / 2, curY, flW, flH);
   } catch (e) {
     drawDottedLine(ctx, rx + rw * 0.25, curY + 4 * sRatio, rx + rw * 0.75, blue, 1 * sRatio);

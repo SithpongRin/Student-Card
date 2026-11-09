@@ -9,15 +9,62 @@ export interface CardSizePreset {
   isPopular?: boolean;
 }
 
+export interface SheetLayoutOption {
+  id: '9-cards' | '4-cards';
+  nameKm: string;
+  nameEn: string;
+  cardsPerPage: number;
+  gridCols: number;
+  gridRows: number;
+  recommendedWidthMm: number;
+  recommendedHeightMm: number;
+  descriptionKm: string;
+}
+
+export const A4_SHEET_LAYOUT_OPTIONS: SheetLayoutOption[] = [
+  {
+    id: '9-cards',
+    nameKm: '១ សន្លឹក ៩ កាត (3 × 3)',
+    nameEn: '9 Cards / Sheet (Standard)',
+    cardsPerPage: 9,
+    gridCols: 3,
+    gridRows: 3,
+    recommendedWidthMm: 64,
+    recommendedHeightMm: 92,
+    descriptionKm: 'ទំហំស្តង់ដារផ្លូវការក្រសួងអប់រំ (៦៤ × ៩២ mm) សន្សំសំចៃក្រដាស',
+  },
+  {
+    id: '4-cards',
+    nameKm: '១ សន្លឹក ៤ កាត (2 × 2)',
+    nameEn: '4 Cards / Sheet (Large)',
+    cardsPerPage: 4,
+    gridCols: 2,
+    gridRows: 2,
+    recommendedWidthMm: 95,
+    recommendedHeightMm: 135,
+    descriptionKm: 'ខ្នាតធំច្បាស់ល្អ (៩៥ × ១៣៥ mm) អក្សរធំ ងាយស្រួលមើល និងបិទរូបថត 3x4 ធំទូលាយ',
+  },
+];
+
 export const CARD_SIZE_PRESETS: CardSizePreset[] = [
   {
-    id: 'cr80-portrait',
-    nameKm: 'កាត ATM / PVC (CR80) បញ្ឈរ',
-    nameEn: '54 × 86 mm (CR80 Portrait)',
-    widthMm: 54,
-    heightMm: 86,
+    id: 'moeys-ref',
+    nameKm: 'គំរូដើមក្រសួងអប់រំ (៩ កាតលើ A4)',
+    nameEn: '64 × 92 mm (MoEYS Official - 9 on A4)',
+    widthMm: 64,
+    heightMm: 92,
     orientation: 'portrait',
-    descriptionKm: 'ទំហំកាតប្លាស្ទិក ATM / PVC ស្តង់ដារ (ពេញនិយមបំផុត)',
+    descriptionKm: 'ទំហំគំរូដើមផ្លូវការ (បោះពុម្ព ៩ កាតលើ A4 ពេញនិយមទូទាំងប្រទេស)',
+    isPopular: true,
+  },
+  {
+    id: 'a6-large-4on-a4',
+    nameKm: 'កាតខ្នាតធំ (៤ កាតលើ A4)',
+    nameEn: '95 × 135 mm (4 on A4 Large)',
+    widthMm: 95,
+    heightMm: 135,
+    orientation: 'portrait',
+    descriptionKm: 'បោះពុម្ព ៤ កាតលើ A4 (អក្សរធំច្បាស់ល្អ និងបិទរូបថត 3x4 ធំទូលាយ)',
     isPopular: true,
   },
   {
@@ -27,17 +74,17 @@ export const CARD_SIZE_PRESETS: CardSizePreset[] = [
     widthMm: 86,
     heightMm: 54,
     orientation: 'landscape',
-    descriptionKm: 'ទំហំកាតប្លាស្ទិក ATM / PVC ស្តង់ដារផ្ដេក',
+    descriptionKm: 'ទំហំកាតប្លាស្ទិក ATM / PVC ស្តង់ដារផ្ដេក (១០ កាតលើ A4)',
     isPopular: true,
   },
   {
-    id: 'moeys-ref',
-    nameKm: 'គំរូដើមក្រសួងអប់រំ (MoEYS)',
-    nameEn: '64 × 92 mm (MoEYS Official)',
-    widthMm: 64,
-    heightMm: 92,
+    id: 'cr80-portrait',
+    nameKm: 'កាត ATM / PVC (CR80) បញ្ឈរ',
+    nameEn: '54 × 86 mm (CR80 Portrait)',
+    widthMm: 54,
+    heightMm: 86,
     orientation: 'portrait',
-    descriptionKm: 'ទំហំគំរូដើមផ្លូវការ (បោះពុម្ព ៩ កាតលើ A4)',
+    descriptionKm: 'ទំហំកាតប្លាស្ទិក ATM / PVC ស្តង់ដារបញ្ឈរ',
     isPopular: true,
   },
   {
@@ -85,8 +132,51 @@ export function calculateA4GridLayout(
   cardWidthMm: number,
   cardHeightMm: number,
   paperWidthMm: number = 210,
-  paperHeightMm: number = 297
+  paperHeightMm: number = 297,
+  targetCardsPerPage?: number
 ): GridLayoutResult {
+  // If user explicitly chose 4 cards per sheet (2x2 grid)
+  if (targetCardsPerPage === 4) {
+    const cols = 2;
+    const rows = 2;
+    const totalW = cols * cardWidthMm;
+    const totalH = rows * cardHeightMm;
+    const marginLeftMm = Math.max(0, (paperWidthMm - totalW) / 2);
+    const marginTopMm = Math.max(0, (paperHeightMm - totalH) / 2);
+    return {
+      cols,
+      rows,
+      cardsPerPage: 4,
+      marginLeftMm: Math.round(marginLeftMm * 10) / 10,
+      marginTopMm: Math.round(marginTopMm * 10) / 10,
+      cardWidthMm,
+      cardHeightMm,
+      paperWidthMm,
+      paperHeightMm,
+    };
+  }
+
+  // If user explicitly chose 9 cards per sheet (3x3 grid)
+  if (targetCardsPerPage === 9) {
+    const cols = 3;
+    const rows = 3;
+    const totalW = cols * cardWidthMm;
+    const totalH = rows * cardHeightMm;
+    const marginLeftMm = Math.max(0, (paperWidthMm - totalW) / 2);
+    const marginTopMm = Math.max(0, (paperHeightMm - totalH) / 2);
+    return {
+      cols,
+      rows,
+      cardsPerPage: 9,
+      marginLeftMm: Math.round(marginLeftMm * 10) / 10,
+      marginTopMm: Math.round(marginTopMm * 10) / 10,
+      cardWidthMm,
+      cardHeightMm,
+      paperWidthMm,
+      paperHeightMm,
+    };
+  }
+
   // Safe margins for physical printing (at least 5mm)
   const minMarginX = 5;
   const minMarginY = 5;
