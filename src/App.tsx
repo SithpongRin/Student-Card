@@ -3,6 +3,7 @@ import { useAppStore } from './store/useAppStore';
 import { initializeDatabase } from './db/database';
 import { AppleSidebar } from './components/layout/AppleSidebar';
 import { AppleHeader } from './components/layout/AppleHeader';
+import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { StudentListView } from './components/students/StudentListView';
 import { ExcelImportView } from './components/import/ExcelImportView';
@@ -77,11 +78,14 @@ export const App: React.FC = () => {
         {/* Apple Translucent Sticky Header */}
         <AppleHeader />
 
-        {/* Scrollable View Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        {/* Scrollable View Content (pb-20 for mobile bottom navigation clearance) */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-0">
           {renderActiveView()}
         </main>
       </div>
+
+      {/* Sleek Mobile Bottom Navigation Bar (< md) */}
+      <MobileBottomNav />
 
       {/* Floating Apple Toast Notifications */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">

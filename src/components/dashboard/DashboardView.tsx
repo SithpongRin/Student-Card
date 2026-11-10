@@ -76,9 +76,9 @@ export const DashboardView: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#163d7e] via-[#0d2550] to-[#091b3a] p-8 text-white shadow-[0_20px_50px_rgba(22,61,126,0.25)]">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#163d7e] via-[#0d2550] to-[#091b3a] p-5 sm:p-8 text-white shadow-[0_20px_50px_rgba(22,61,126,0.25)]">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-2xl space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-medium text-blue-200">

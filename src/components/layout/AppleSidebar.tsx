@@ -11,6 +11,7 @@ import {
   Settings,
   WifiOff,
   Code2,
+  X,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { MOEYS_EMBLEM_DATA_URI } from '../../utils/assets';
@@ -24,7 +25,7 @@ interface NavItem {
 }
 
 export const AppleSidebar: React.FC = () => {
-  const { activeView, setActiveView } = useAppStore();
+  const { activeView, setActiveView, isMobileSidebarOpen, setIsMobileSidebarOpen } = useAppStore();
 
   const navItems: NavItem[] = [
     {
@@ -78,27 +79,40 @@ export const AppleSidebar: React.FC = () => {
     },
   ];
 
-  return (
-    <aside className="w-64 h-screen bg-[#f5f5f7]/90 backdrop-blur-2xl border-r border-black/[0.06] flex flex-col justify-between shrink-0 select-none z-20">
+  const renderNavContent = (isMobile: boolean = false) => (
+    <>
       {/* Brand Header */}
       <div>
         <div className="p-5 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-black/[0.04] flex items-center justify-center p-1.5 overflow-hidden">
-              <img
-                src={MOEYS_EMBLEM_DATA_URI}
-                alt="MoEYS Emblem"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="font-moul text-sm text-[#1d1d1f] tracking-tight">Card សិស្ស</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-black/[0.04] flex items-center justify-center p-1.5 overflow-hidden">
+                <img
+                  src={MOEYS_EMBLEM_DATA_URI}
+                  alt="MoEYS Emblem"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <p className="text-[11px] font-medium text-[#86868b] flex items-center gap-1">
-                <span>Student ID Generator</span>
-              </p>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="font-moul text-sm text-[#1d1d1f] tracking-tight">Card សិស្ស</h1>
+                </div>
+                <p className="text-[11px] font-medium text-[#86868b] flex items-center gap-1">
+                  <span>Student ID Generator</span>
+                </p>
+              </div>
             </div>
+
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="w-8 h-8 rounded-full bg-black/[0.05] hover:bg-black/[0.1] flex items-center justify-center text-[#6e6e73] active:scale-95 transition-all"
+                aria-label="Close navigation"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -109,9 +123,10 @@ export const AppleSidebar: React.FC = () => {
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => setActiveView(item.id)}
                 className={clsx(
-                  'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all duration-200 group text-left',
+                  'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all duration-200 group text-left active:scale-[0.98]',
                   isActive
                     ? 'bg-[#0071e3] text-white shadow-[0_2px_8px_rgba(0,113,227,0.25)]'
                     : 'text-[#1d1d1f] hover:bg-black/[0.05] active:bg-black/[0.08]'
@@ -166,7 +181,7 @@ export const AppleSidebar: React.FC = () => {
             <WifiOff size={13} className="text-[#86868b]" />
           </div>
           <p className="text-[10px] text-[#86868b] mt-1 leading-snug">
-            ទិន្នន័យទាំងអស់រក្សាទុកក្នុងកុំព្យូទ័រលោកអ្នក ដោយសុវត្ថិភាព។
+            ទិន្នន័យទាំងអស់រក្សាទុកក្នុងកុំព្យូទ័រ/ទូរស័ព្ទលោកអ្នក ដោយសុវត្ថិភាព។
           </p>
         </div>
 
@@ -181,6 +196,34 @@ export const AppleSidebar: React.FC = () => {
           </span>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* 1. Desktop Persistent Sidebar (md and up) */}
+      <aside className="hidden md:flex w-64 h-screen bg-[#f5f5f7]/90 backdrop-blur-2xl border-r border-black/[0.06] flex-col justify-between shrink-0 select-none z-20">
+        {renderNavContent(false)}
+      </aside>
+
+      {/* 2. Mobile Backdrop Overlay */}
+      {isMobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 animate-in fade-in"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* 3. Mobile Slide-over Drawer (below md) */}
+      <aside
+        className={clsx(
+          'fixed inset-y-0 left-0 z-50 w-72 h-full bg-[#f5f5f7] border-r border-black/[0.08] shadow-2xl flex flex-col justify-between select-none transition-transform duration-300 ease-out md:hidden overflow-y-auto',
+          isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {renderNavContent(true)}
+      </aside>
+    </>
   );
 };

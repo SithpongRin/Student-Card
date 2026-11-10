@@ -111,7 +111,7 @@ export const BackupRestoreView: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-[#1d1d1f] font-moul tracking-wide">

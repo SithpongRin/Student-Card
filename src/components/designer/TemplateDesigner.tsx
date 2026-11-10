@@ -64,7 +64,7 @@ export const TemplateDesigner: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -166,7 +166,7 @@ export const TemplateDesigner: React.FC = () => {
               />
             }
           >
-            <div className="p-6 bg-[#f5f5f7] rounded-2xl flex flex-wrap items-center justify-center gap-6 min-h-[480px]">
+            <div className="p-3 sm:p-6 bg-[#f5f5f7] rounded-2xl flex flex-wrap items-center justify-center gap-4 sm:gap-6 min-h-[420px] sm:min-h-[480px] overflow-x-auto">
               {(activeSide === 'split' || activeSide === 'front') && (
                 <div className="flex flex-col items-center gap-2">
                   <span className="text-[11px] font-semibold text-[#86868b]">
@@ -224,7 +224,7 @@ export const TemplateDesigner: React.FC = () => {
               {[
                 { id: 'institution', label: 'ស្ថាប័ន & សាលា' },
                 { id: 'card', label: 'ចំណងជើង & ហត្ថលេខា' },
-                { id: 'watermark', label: 'Watermark' },
+                { id: 'watermark', label: 'ផ្ទៃខាងក្រោយ & Watermark' },
                 { id: 'dimensions', label: 'ខ្នាត & ពណ៌' },
               ].map((tab) => (
                 <button
@@ -413,41 +413,117 @@ export const TemplateDesigner: React.FC = () => {
               </div>
             )}
 
-            {/* TAB 3: WATERMARK & EMBLEM */}
+            {/* TAB 3: BACK SIDE & WATERMARK */}
             {activeTab === 'watermark' && (
               <div className="space-y-4 text-xs font-battambang">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-[#f5f5f7]">
-                  <div>
-                    <span className="font-semibold text-[#1d1d1f]">
-                      បង្ហាញ Watermark នៅផ្ទៃខាងក្រោយ
-                    </span>
-                    <p className="text-[11px] text-[#86868b]">និមិត្តសញ្ញាក្រសួងអប់រំនៅចំកណ្តាលកាត</p>
+                {/* Back side layout selector */}
+                <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
+                  <span className="font-semibold text-[#1d1d1f] block">
+                    ទម្រង់ផ្នែកខាងក្រោយកាត (Back Side Format):
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateTemplateField('backLayout', 'rules-and-emblem')}
+                      className={`p-2.5 rounded-xl border text-left transition-all ${
+                        (currentTemplate.backLayout || 'rules-and-emblem') === 'rules-and-emblem'
+                          ? 'border-[#0071e3] bg-blue-50/70 font-bold text-[#0071e3]'
+                          : 'border-black/[0.06] bg-white text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="text-xs">📜 ឡូហ្គោ + បទបញ្ជាសាលា</div>
+                      <div className="text-[10px] opacity-75 font-normal mt-0.5">
+                        មានបទបញ្ជា ៥ ចំណុច & លេខទូរស័ព្ទ
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => updateTemplateField('backLayout', 'emblem-only')}
+                      className={`p-2.5 rounded-xl border text-left transition-all ${
+                        currentTemplate.backLayout === 'emblem-only'
+                          ? 'border-[#0071e3] bg-blue-50/70 font-bold text-[#0071e3]'
+                          : 'border-black/[0.06] bg-white text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="text-xs">🏛️ ឡូហ្គោក្រសួងកណ្ដាល</div>
+                      <div className="text-[10px] opacity-75 font-normal mt-0.5">
+                        គំរូដើមរដ្ឋផ្លូវការ (Reference MoEYS)
+                      </div>
+                    </button>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={currentTemplate.showWatermark}
-                    onChange={(e) => updateTemplateField('showWatermark', e.target.checked)}
-                    className="w-4 h-4 accent-[#0071e3] rounded"
-                  />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-medium text-[#1d1d1f]">
-                      កម្រិតភាពច្បាស់ Watermark ({Math.round(currentTemplate.watermarkOpacity * 100)}%)
-                    </label>
+                {/* School Phone for Back Side */}
+                {(currentTemplate.backLayout || 'rules-and-emblem') !== 'emblem-only' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block font-medium text-[#1d1d1f] mb-1">
+                        លេខទូរស័ព្ទទំនាក់ទំនងសាលារៀន (School Contact Phone)
+                      </label>
+                      <input
+                        type="text"
+                        value={currentTemplate.backSchoolPhone || ''}
+                        onChange={(e) => updateTemplateField('backSchoolPhone', e.target.value)}
+                        placeholder="ឧ. 023 880 880 / 012 345 678"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-black/[0.08] focus:ring-2 focus:ring-[#0071e3] focus:outline-none text-xs"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#f5f5f7]">
+                      <div>
+                        <span className="font-semibold text-[#1d1d1f]">
+                          បង្ហាញបាកូដ / QR កូដសម្គាល់កាត
+                        </span>
+                        <p className="text-[11px] text-[#86868b]">សម្រាប់ម៉ាស៊ីនស្កេនបណ្ណាល័យ ឬវត្តមាន</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={currentTemplate.showBackBarcodeOrQr ?? true}
+                        onChange={(e) => updateTemplateField('showBackBarcodeOrQr', e.target.checked)}
+                        className="w-4 h-4 accent-[#0071e3] rounded"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="range"
-                    min="0.05"
-                    max="0.40"
-                    step="0.01"
-                    value={currentTemplate.watermarkOpacity}
-                    onChange={(e) =>
-                      updateTemplateField('watermarkOpacity', parseFloat(e.target.value))
-                    }
-                    className="w-full accent-[#0071e3]"
-                  />
+                )}
+
+                {/* Watermark Controls */}
+                <div className="pt-2 border-t border-black/[0.06]">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#f5f5f7]">
+                    <div>
+                      <span className="font-semibold text-[#1d1d1f]">
+                        បង្ហាញ Watermark នៅផ្ទៃខាងមុខ
+                      </span>
+                      <p className="text-[11px] text-[#86868b]">និមិត្តសញ្ញាក្រសួងអប់រំនៅចំកណ្តាលកាត</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={currentTemplate.showWatermark}
+                      onChange={(e) => updateTemplateField('showWatermark', e.target.checked)}
+                      className="w-4 h-4 accent-[#0071e3] rounded"
+                    />
+                  </div>
+
+                  {currentTemplate.showWatermark && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="font-medium text-[#1d1d1f]">
+                          កម្រិតភាពច្បាស់ Watermark ({Math.round(currentTemplate.watermarkOpacity * 100)}%)
+                        </label>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.05"
+                        max="0.40"
+                        step="0.01"
+                        value={currentTemplate.watermarkOpacity}
+                        onChange={(e) =>
+                          updateTemplateField('watermarkOpacity', parseFloat(e.target.value))
+                        }
+                        className="w-full accent-[#0071e3]"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )}

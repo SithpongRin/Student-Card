@@ -4,6 +4,14 @@ import { MOEYS_EMBLEM_DATA_URI, DEFAULT_FLOURISH_DATA_URI } from '../utils/asset
 export const TEMPLATE_1_ID = 'template-reference-moeys-default';
 export const TEMPLATE_2_ID = 'template-battambang-bottom-photo';
 
+export const DEFAULT_STUDENT_CARD_RULES: string[] = [
+  '១. កាតនេះជាឯកសារផ្លូវការសម្រាប់សម្គាល់ខ្លួនសិស្សក្នុងគ្រឹះស្ថានសិក្សា។',
+  '២. សិស្សត្រូវពាក់ ឬយកតាមខ្លួនរាល់ពេលមកសាលារៀន និងពេលប្រឡង។',
+  '៣. ហាមកែបន្លំ ផ្ទេរ ឬឱ្យអ្នកដទៃខ្ចីប្រើប្រាស់ជាដាច់ខាត។',
+  '៤. ករណីបាត់បង់ ឬខូចខាត ត្រូវរាយការណ៍ជូនការិយាល័យរដ្ឋបាលសាលា។',
+  '៥. ប្រសិនរើសបាន សូមប្រគល់ជូនសាលា ឬទាក់ទងតាមទូរស័ព្ទខាងក្រោម។',
+];
+
 // TEMPLATE 1: Exact Reproduction of Reference Image 1 (អត្តសញ្ញាណប័ណ្ណសិស្ស - Top-Left Photo)
 export const defaultReferenceTemplate: CardTemplate = {
   id: TEMPLATE_1_ID,
@@ -44,6 +52,10 @@ export const defaultReferenceTemplate: CardTemplate = {
   showWatermark: true,
   showBackEmblem: true,
   backEmblemSizePercent: 52,
+  backLayout: 'rules-and-emblem',
+  backSchoolPhone: '023 880 880 / 012 345 678',
+  backRulesText: DEFAULT_STUDENT_CARD_RULES,
+  showBackBarcodeOrQr: true,
   borderWidthMm: 0.6,
   innerPaddingMm: 2.8,
 
@@ -92,6 +104,10 @@ export const templateBattambangBottomPhoto: CardTemplate = {
   showWatermark: true,
   showBackEmblem: true,
   backEmblemSizePercent: 52,
+  backLayout: 'rules-and-emblem',
+  backSchoolPhone: '053 952 888',
+  backRulesText: DEFAULT_STUDENT_CARD_RULES,
+  showBackBarcodeOrQr: true,
   borderWidthMm: 0.6,
   innerPaddingMm: 2.8,
 

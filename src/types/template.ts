@@ -45,6 +45,11 @@ export interface CardTemplate {
   showWatermark: boolean;
   showBackEmblem: boolean;
   backEmblemSizePercent: number; // 52%
+  backLayout?: 'emblem-only' | 'rules-and-emblem' | 'modern-qr';
+  backSchoolPhone?: string;
+  backSchoolAddress?: string;
+  backRulesText?: string[];
+  showBackBarcodeOrQr?: boolean;
   borderWidthMm: number;
   innerPaddingMm: number;
 

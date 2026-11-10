@@ -1,6 +1,7 @@
 import { Student } from '../types/student';
 import { CardTemplate } from '../types/template';
 import { toKhmerNumerals, toArabicNumerals } from '../utils/khmerNumerals';
+import { DEFAULT_STUDENT_CARD_RULES } from '../db/defaultTemplates';
 import {
   MOEYS_EMBLEM_DATA_URI,
   getMoeysEmblemUrl,
@@ -579,8 +580,10 @@ export async function renderFrontCardToCanvas(
     // 5. ទីលំនៅបច្ចុប្បន្នៈ
     drawFullLine('ទីលំនៅបច្ចុប្បន្នៈ', student?.address, true, false, 10);
 
-    // 7. FOOTER SIGNATURES & NAMES AREA (Matches original physical card)
-    const yDate = fullY + 6 * sRatio;
+    // 7. FOOTER SIGNATURES & NAMES AREA (Matches original physical card, anchored to bottom)
+    const footerH = 58 * sRatio;
+    const targetFooterY = by + bh - innerPad - footerH;
+    const yDate = Math.max(fullY + 6 * sRatio, targetFooterY);
     const fFooter = Math.round(9 * sRatio);
 
     // Left: Director Signature Block (កន្លែងសរសេរ & ឈ្មោះនាយកពីក្រោម)
@@ -843,6 +846,8 @@ export async function renderBackCardToCanvas(
   template: CardTemplate,
   options: RenderCardOptions = {}
 ): Promise<HTMLCanvasElement> {
+  await ensureKhmerFontsLoaded();
+
   const widthMm = options.widthMm || template.cardWidthMm || 64;
   const heightMm = options.heightMm || template.cardHeightMm || 92;
   const dpi = options.dpi || DPI_300;
@@ -850,6 +855,8 @@ export async function renderBackCardToCanvas(
 
   const widthPx = Math.round(widthMm * scale);
   const heightPx = Math.round(heightMm * scale);
+  const isLandscape = widthMm > heightMm;
+  const sRatio = isLandscape ? widthPx / 350 : widthPx / 242;
 
   const canvas = document.createElement('canvas');
   canvas.width = widthPx;
@@ -860,22 +867,151 @@ export async function renderBackCardToCanvas(
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, widthPx, heightPx);
 
-  if (template.showBackEmblem) {
-    try {
-      const emblemImg = await loadImage(
-        template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
-          ? template.emblemUrl
-          : MOEYS_EMBLEM_DATA_URI
-      );
-      const sizePercent = (template.backEmblemSizePercent || 52) / 100;
-      const emblemW = widthPx * sizePercent;
-      const emblemH = emblemW * 1.15;
-      const ex = (widthPx - emblemW) / 2;
-      const ey = (heightPx - emblemH) / 2;
-      ctx.drawImage(emblemImg, ex, ey, emblemW, emblemH);
-    } catch (e) {
-      console.warn('Could not draw back emblem on canvas:', e);
+  const blue = template.primaryColor || '#163d7e';
+  const layout = template.backLayout || 'rules-and-emblem';
+
+  // MODE 1: Centered Emblem Only (Reference Standard)
+  if (layout === 'emblem-only') {
+    if (template.showBackEmblem) {
+      try {
+        const emblemImg = await loadImage(
+          template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
+            ? template.emblemUrl
+            : MOEYS_EMBLEM_DATA_URI
+        );
+        const sizePercent = (template.backEmblemSizePercent || 52) / 100;
+        const emblemW = widthPx * sizePercent;
+        const emblemH = emblemW * 1.15;
+        const ex = (widthPx - emblemW) / 2;
+        const ey = (heightPx - emblemH) / 2;
+        ctx.drawImage(emblemImg, ex, ey, emblemW, emblemH);
+      } catch (e) {
+        console.warn('Could not draw back emblem on canvas:', e);
+      }
     }
+    return canvas;
+  }
+
+  // MODE 2 & 3: Rules & Emblem / Modern QR
+  const cardPad = 4.5 * sRatio;
+  const bx = cardPad;
+  const by = cardPad;
+  const bw = widthPx - 2 * cardPad;
+  const bh = heightPx - 2 * cardPad;
+
+  // Outer solid blue border
+  ctx.strokeStyle = blue;
+  ctx.lineWidth = 1.2 * sRatio;
+  ctx.strokeRect(bx, by, bw, bh);
+
+  const innerPad = 4 * sRatio;
+  const cx = bx + innerPad;
+  let curY = by + innerPad;
+  const cw = bw - 2 * innerPad;
+
+  // Top header: Emblem + Ministry & School
+  try {
+    const logoImg = await loadImage(
+      template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg')
+        ? template.emblemUrl
+        : MOEYS_EMBLEM_DATA_URI
+    );
+    const logoW = Math.round(20 * sRatio);
+    const logoH = Math.round(26 * sRatio);
+    ctx.drawImage(logoImg, cx, curY, logoW, logoH);
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = blue;
+    ctx.font = `normal ${Math.round(9.5 * sRatio)}px ${FONT_MOUL}`;
+    ctx.fillText(template.ministryDepartment || 'ក្រសួងអប់រំ យុវជន និងកីឡា', cx + logoW + 6 * sRatio, curY + 2 * sRatio);
+
+    ctx.fillStyle = '#334155';
+    ctx.font = `bold ${Math.round(8.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    const schoolText = template.schoolNameOnly || 'សាលារៀនចំណេះទូទៅ';
+    ctx.fillText(schoolText, cx + logoW + 6 * sRatio, curY + 14 * sRatio);
+
+    curY += logoH + 6 * sRatio;
+  } catch (e) {
+    curY += 20 * sRatio;
+  }
+
+  // Header separator line
+  ctx.strokeStyle = `${blue}40`;
+  ctx.lineWidth = 0.8 * sRatio;
+  ctx.beginPath();
+  ctx.moveTo(cx, curY);
+  ctx.lineTo(cx + cw, curY);
+  ctx.stroke();
+  curY += 6 * sRatio;
+
+  // Title: បទបញ្ជាទូទៅសម្រាប់សិស្ស
+  ctx.textAlign = 'center';
+  ctx.fillStyle = blue;
+  ctx.font = `normal ${Math.round(10.5 * sRatio)}px ${FONT_MOUL}`;
+  ctx.fillText('បទបញ្ជាទូទៅសម្រាប់សិស្ស', cx + cw / 2, curY);
+  curY += 16 * sRatio;
+
+  // Rules list (Enforce exactly 5 rules with backfill)
+  const userRules = (template.backRulesText || []).filter((r) => typeof r === 'string' && r.trim().length > 0);
+  const rules = [...userRules, ...DEFAULT_STUDENT_CARD_RULES].slice(0, 5);
+
+  ctx.textAlign = 'left';
+  const ruleFontSize = Math.round(8.5 * sRatio);
+  ctx.font = `normal ${ruleFontSize}px ${FONT_BATTAMBANG}`;
+
+  const availableRulesHeight = (by + bh - 40 * sRatio) - curY;
+  const ruleGap = Math.min(18 * sRatio, availableRulesHeight / (rules.length || 1));
+
+  for (let i = 0; i < rules.length; i++) {
+    const ruleText = rules[i];
+    ctx.fillStyle = blue;
+    ctx.fillText('•', cx + 2 * sRatio, curY);
+
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(ruleText, cx + 10 * sRatio, curY);
+    curY += ruleGap;
+  }
+
+  // Footer area (pinned near bottom)
+  const footerY = by + bh - innerPad - 22 * sRatio;
+  ctx.strokeStyle = `${blue}40`;
+  ctx.lineWidth = 0.8 * sRatio;
+  ctx.beginPath();
+  ctx.moveTo(cx, footerY - 4 * sRatio);
+  ctx.lineTo(cx + cw, footerY - 4 * sRatio);
+  ctx.stroke();
+
+  // Contact info
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#64748b';
+  ctx.font = `normal ${Math.round(7.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+  ctx.fillText('ទំនាក់ទំនងសាលារៀន៖', cx, footerY + 2 * sRatio);
+
+  const phone = template.backSchoolPhone || '023 880 880 / 012 345 678';
+  ctx.fillStyle = '#0f172a';
+  ctx.font = `bold ${Math.round(8.5 * sRatio)}px sans-serif`;
+  ctx.fillText(phone, cx, footerY + 12 * sRatio);
+
+  // Barcode simulation on right
+  if (template.showBackBarcodeOrQr) {
+    const barW = Math.round(45 * sRatio);
+    const barH = Math.round(14 * sRatio);
+    const barX = cx + cw - barW;
+    const barY = footerY + 1 * sRatio;
+
+    // Draw simulated barcode bars
+    ctx.fillStyle = '#0f172a';
+    const numBars = 20;
+    const step = barW / numBars;
+    for (let b = 0; b < numBars; b++) {
+      if (b % 3 !== 0) {
+        ctx.fillRect(barX + b * step, barY, step * 0.6, barH);
+      }
+    }
+    ctx.font = `normal ${Math.round(6.5 * sRatio)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('MOEYS-ID', barX + barW / 2, barY + barH + 7 * sRatio);
   }
 
   return canvas;

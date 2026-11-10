@@ -28,11 +28,15 @@ interface AppState {
 
   isOnline: boolean;
   setIsOnline: (online: boolean) => void;
+
+  isMobileSidebarOpen: boolean;
+  setIsMobileSidebarOpen: (open: boolean) => void;
+  toggleMobileSidebar: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
   activeView: 'dashboard',
-  setActiveView: (view) => set({ activeView: view }),
+  setActiveView: (view) => set({ activeView: view, isMobileSidebarOpen: false }),
 
   toasts: [],
   addToast: (toast) => {
@@ -46,4 +50,8 @@ export const useAppStore = create<AppState>((set) => ({
 
   isOnline: navigator.onLine,
   setIsOnline: (online) => set({ isOnline: online }),
+
+  isMobileSidebarOpen: false,
+  setIsMobileSidebarOpen: (open) => set({ isMobileSidebarOpen: open }),
+  toggleMobileSidebar: () => set((state) => ({ isMobileSidebarOpen: !state.isMobileSidebarOpen })),
 }));

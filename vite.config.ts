@@ -6,6 +6,14 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/Student-Card/',
+  server: {
+    host: true, // Listen on all network addresses (0.0.0.0) so phone can access via WiFi
+    port: 5173,
+  },
+  preview: {
+    host: true,
+    port: 4173,
+  },
   plugins: [
     react(),
     VitePWA({

@@ -4,7 +4,6 @@ import { CardTemplate } from '../../types/template';
 import { toKhmerNumerals, toArabicNumerals } from '../../utils/khmerNumerals';
 import {
   MOEYS_EMBLEM_DATA_URI,
-  getMoeysEmblemUrl,
   resolveFlourishUrl,
   DEFAULT_FLOURISH_DATA_URI,
 } from '../../utils/assets';
@@ -32,6 +31,11 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
   const baseWidth = Math.round(cardWidthMm * 5);
   const baseHeight = Math.round(cardHeightMm * 5);
 
+  // Scalability ratio based on canonical standard references:
+  // Portrait reference: 64mm x 92mm => 320px x 460px
+  // Landscape reference: 86mm x 54mm => 430px x 270px
+  const s = isLandscape ? baseWidth / 430 : baseWidth / 320;
+
   const blueColor = template.primaryColor || '#163d7e';
   const isBottomPhoto = template.variant === 'bottom-photo';
 
@@ -42,7 +46,9 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
 
   // Safe Emblem & Flourish Sources (Embedded Data URIs ensure logo and flourish NEVER disappear)
   const emblemSource =
-    template.emblemUrl && !template.emblemUrl.includes('moeys_emblem.svg') && (template.emblemUrl.startsWith('data:') || template.emblemUrl.startsWith('http'))
+    template.emblemUrl &&
+    !template.emblemUrl.includes('moeys_emblem.svg') &&
+    (template.emblemUrl.startsWith('data:') || template.emblemUrl.startsWith('http'))
       ? template.emblemUrl
       : MOEYS_EMBLEM_DATA_URI;
   const flourishSource = resolveFlourishUrl(template.flourishUrl);
@@ -53,9 +59,11 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
   const nationality = student?.nationality || (student?.nameKm ? 'ខ្មែរ' : '');
   const studentClass = student?.class ? toArabicNumerals(student.class) : '';
   const studentId = student?.studentId || '';
-  const cardNumber = student?.cardNumber 
-    ? toKhmerNumerals(student.cardNumber) 
-    : (studentId ? toKhmerNumerals(studentId) : '');
+  const cardNumber = student?.cardNumber
+    ? toKhmerNumerals(student.cardNumber)
+    : studentId
+    ? toKhmerNumerals(studentId)
+    : '';
   const dob = student?.dateOfBirth ? toArabicNumerals(student.dateOfBirth) : '';
   const pob = student?.placeOfBirth || '';
   const fatherName = student?.fatherName || '';
@@ -63,9 +71,20 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
   const motherName = student?.motherName || '';
   const motherJob = student?.motherOccupation || '';
   const address = student?.address || '';
-  const academicYear = student?.academicYear 
-    ? toKhmerNumerals(student.academicYear) 
+  const academicYear = student?.academicYear
+    ? toKhmerNumerals(student.academicYear)
     : '';
+
+  // Helper for empty dotted line
+  const renderDottedLine = () => (
+    <div
+      className="flex-1 border-b border-dotted min-w-[20px] self-end mb-[2px]"
+      style={{
+        borderColor: `${blueColor}55`,
+        borderWidth: `${Math.max(1, 1 * s)}px`,
+      }}
+    />
+  );
 
   return (
     <div
@@ -81,8 +100,9 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
           height: `${baseHeight}px`,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
+          padding: `${Math.round(6 * s)}px`,
         }}
-        className={`relative bg-white text-[${blueColor}] font-battambang p-[6px] box-border ${
+        className={`relative bg-white font-battambang box-border ${
           showCuttingBorder ? 'border border-dashed border-slate-300' : ''
         }`}
       >
@@ -90,9 +110,10 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
         <div
           style={{
             borderColor: blueColor,
-            borderWidth: '1.2px',
+            borderWidth: `${Math.max(1, 1.2 * s)}px`,
+            padding: `${Math.round(5 * s)}px`,
           }}
-          className="relative w-full h-full border border-solid p-[5px] flex flex-col overflow-hidden"
+          className="relative w-full h-full border border-solid flex flex-col overflow-hidden"
         >
           {/* Centered Watermark Logo (MoEYS emblem) */}
           {template.showWatermark && (
@@ -100,30 +121,40 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
               className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
               style={{
                 opacity: template.watermarkOpacity || 0.16,
-                transform: isBottomPhoto ? 'translateY(0px)' : 'translateY(20px)',
+                transform: isBottomPhoto ? 'translateY(0px)' : `translateY(${Math.round(20 * s)}px)`,
               }}
             >
               <img
                 src={emblemSource}
                 alt="MoEYS Watermark"
-                className="w-[170px] h-[170px] object-contain"
+                style={{
+                  width: `${Math.round(170 * s)}px`,
+                  height: `${Math.round(170 * s)}px`,
+                }}
+                className="object-contain"
               />
             </div>
           )}
 
           {/* ======================================================== */}
-          {/* LANDSCAPE LAYOUT (e.g. 86mm x 54mm CR80 Landscape)       */}
+          {/* 1. LANDSCAPE LAYOUT (e.g. 86mm x 54mm CR80 Landscape)    */}
           {/* ======================================================== */}
           {isLandscape && (
-            <div className="relative z-10 flex h-full gap-3 p-1">
+            <div
+              className="relative z-10 flex h-full justify-between"
+              style={{ gap: `${Math.round(10 * s)}px`, padding: `${Math.round(3 * s)}px` }}
+            >
               {/* Left Column: 3x4 Photo Box + ID */}
-              <div className="flex flex-col items-center justify-between shrink-0" style={{ width: '135px' }}>
+              <div
+                className="flex flex-col items-center justify-between shrink-0"
+                style={{ width: `${Math.round(108 * s)}px` }}
+              >
                 <div
                   style={{
                     borderColor: blueColor,
-                    borderWidth: '1.2px',
-                    width: '135px',
-                    height: '180px',
+                    borderWidth: `${Math.max(1, 1.2 * s)}px`,
+                    width: `${Math.round(108 * s)}px`,
+                    height: `${Math.round(144 * s)}px`, // Strictly 3:4 ratio
                   }}
                   className="border border-solid bg-slate-50/20 flex items-center justify-center relative overflow-hidden"
                 >
@@ -135,55 +166,79 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     />
                   ) : (
                     <div
-                      style={{ color: blueColor }}
-                      className="text-[13px] font-bold font-sans tracking-wider opacity-70"
+                      style={{ color: blueColor, fontSize: `${Math.round(13 * s)}px` }}
+                      className="font-bold font-sans tracking-wider opacity-70"
                     >
                       {template.photoBoxText || '3 x 4'}
                     </div>
                   )}
                 </div>
                 <div
-                  style={{ color: blueColor }}
-                  className="font-battambang font-bold text-[10px] text-center mt-1 truncate w-full"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(9.5 * s)}px`,
+                    marginTop: `${Math.round(4 * s)}px`,
+                  }}
+                  className="font-battambang font-bold text-center truncate w-full"
                 >
-                  {studentId ? `អត្តលេខៈ ${studentId}` : 'អត្តលេខៈ ...........'}
+                  {studentId ? `អត្តលេខៈ ${studentId}` : 'អត្តលេខៈ ..........'}
                 </div>
               </div>
 
               {/* Right Column: Headers, Title, Student Details, Signatures */}
-              <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
+              <div className="flex-1 flex flex-col justify-between min-w-0">
                 {/* Top Headers */}
                 <div className="text-center">
                   <div
-                    style={{ color: blueColor }}
-                    className="font-moul text-[10px] leading-[14px] tracking-wide"
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(10 * s)}px`,
+                      lineHeight: `${Math.round(14 * s)}px`,
+                    }}
+                    className="font-moul tracking-wide"
                   >
                     {template.countryHeaderKm1}
                   </div>
                   <div
-                    style={{ color: blueColor }}
-                    className="font-moul text-[9px] leading-[13px] tracking-wide"
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(9 * s)}px`,
+                      lineHeight: `${Math.round(13 * s)}px`,
+                    }}
+                    className="font-moul tracking-wide"
                   >
                     {template.countryHeaderKm2}
                   </div>
 
                   {/* Ministry & School */}
-                  <div className="flex items-center gap-1.5 mt-1 text-left">
+                  <div className="flex items-center gap-1.5 mt-0.5 text-left">
                     <img
                       src={emblemSource}
                       alt="MoEYS Emblem"
-                      className="w-[16px] h-[20px] object-contain shrink-0"
+                      style={{
+                        width: `${Math.round(16 * s)}px`,
+                        height: `${Math.round(20 * s)}px`,
+                      }}
+                      className="object-contain shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <div
-                        style={{ color: blueColor }}
-                        className="font-battambang font-bold text-[9px] leading-[12px] truncate"
+                        style={{
+                          color: blueColor,
+                          fontSize: `${Math.round(9 * s)}px`,
+                          lineHeight: `${Math.round(12 * s)}px`,
+                        }}
+                        className="font-battambang font-bold truncate"
                       >
                         {template.ministryDepartment}
                       </div>
                       <div
-                        style={{ color: blueColor }}
-                        className="font-battambang text-[8px] leading-[11px] truncate"
+                        style={{
+                          color: blueColor,
+                          fontSize: `${Math.round(8 * s)}px`,
+                          lineHeight: `${Math.round(11 * s)}px`,
+                        }}
+                        className="font-battambang truncate"
                       >
                         <span className="font-semibold">អនុ/វិទ្យាល័យ </span>
                         <span className="font-bold">{displaySchoolName || '................'}</span>
@@ -193,8 +248,13 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
 
                   {/* Title */}
                   <div
-                    style={{ color: blueColor }}
-                    className="font-moul text-[10px] leading-[14px] mt-1"
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(10 * s)}px`,
+                      lineHeight: `${Math.round(14 * s)}px`,
+                      marginTop: `${Math.round(2 * s)}px`,
+                    }}
+                    className="font-moul"
                   >
                     {template.cardTitleKm}
                   </div>
@@ -202,20 +262,28 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
 
                 {/* Details */}
                 <div
-                  style={{ color: blueColor }}
-                  className="space-y-[3px] text-[8.5px] leading-[12px] font-battambang"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(8.5 * s)}px`,
+                    lineHeight: `${Math.round(13 * s)}px`,
+                    gap: `${Math.round(3 * s)}px`,
+                  }}
+                  className="flex flex-col font-battambang my-1"
                 >
                   <div className="flex items-baseline">
                     <span className="shrink-0 font-medium">គោត្តនាម-នាមៈ</span>
-                    <span className="flex-1 pl-1 truncate">
-                      {nameKm ? (
-                        <span className="font-bold text-[10px]">{nameKm}</span>
-                      ) : (
-                        <span className="opacity-70">....................</span>
-                      )}
-                    </span>
+                    {nameKm ? (
+                      <span
+                        className="font-bold pl-1 truncate"
+                        style={{ fontSize: `${Math.round(10 * s)}px` }}
+                      >
+                        {nameKm}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
-                  <div className="flex items-baseline justify-between text-[8px]">
+                  <div className="flex items-baseline justify-between">
                     <div>
                       <span>ភេទ </span>
                       <span className="font-bold">{gender || '...'}</span>
@@ -231,37 +299,53 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   </div>
                   <div className="flex items-baseline">
                     <span className="shrink-0 font-medium">ថ្ងៃខែកំណើតៈ</span>
-                    <span className="flex-1 pl-1 truncate">
-                      {dob ? (
-                        <span className="font-bold font-sans text-[8.5px]">{dob}</span>
-                      ) : (
-                        <span className="opacity-70">....................</span>
-                      )}
-                    </span>
+                    {dob ? (
+                      <span
+                        className="font-bold font-sans pl-1 truncate"
+                        style={{ fontSize: `${Math.round(9 * s)}px` }}
+                      >
+                        {dob}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                   <div className="flex items-baseline">
                     <span className="shrink-0 font-medium">ទីលំនៅៈ</span>
-                    <span className="flex-1 pl-1 truncate text-[8px]">
-                      {address || <span className="opacity-70">....................</span>}
-                    </span>
+                    {address ? (
+                      <span className="font-semibold pl-1 truncate">{address}</span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                 </div>
 
                 {/* Signatures */}
                 <div
-                  style={{ color: blueColor }}
-                  className="flex items-end justify-between text-[7.5px] leading-tight pt-1 border-t border-blue-100"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(7.5 * s)}px`,
+                    paddingTop: `${Math.round(3 * s)}px`,
+                    borderColor: `${blueColor}25`,
+                  }}
+                  className="flex items-end justify-between border-t mt-auto"
                 >
                   <div className="text-left">
                     <div>{template.issueDateLine || 'ថ្ងៃទី...ខែ...ឆ្នាំ២០...'}</div>
-                    <div className="font-bold text-[8px]">
+                    <div
+                      className="font-bold"
+                      style={{ fontSize: `${Math.round(8.5 * s)}px` }}
+                    >
                       {template.directorTitle || 'នាយក'}: {template.directorName || 'ជា សារ៉ា'}
                     </div>
                   </div>
                   <div className="text-right">
                     <div>{template.signatureTitle || 'ហត្ថលេខាសាមីខ្លួន'}</div>
-                    <div className="font-bold text-[8px]">
-                      {nameKm || '................'}
+                    <div
+                      className="font-bold truncate max-w-[90px]"
+                      style={{ fontSize: `${Math.round(8.5 * s)}px` }}
+                    >
+                      {nameKm || '...............'}
                     </div>
                   </div>
                 </div>
@@ -270,31 +354,47 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* VARIANT 1: TOP-PHOTO (Exact Clone of Reference Image 1) */}
+          {/* 2. VARIANT 1: TOP-PHOTO (Exact MoEYS Official Clone)      */}
           {/* ======================================================== */}
           {!isLandscape && !isBottomPhoto && (
-            <div className="relative z-10 flex flex-col h-full">
+            <div className="relative z-10 flex flex-col h-full justify-between">
               {/* 1. Header (Centered) */}
               <div className="text-center pt-[1px]">
                 <div
-                  style={{ color: blueColor }}
-                  className="font-moul text-[12px] leading-[17px] tracking-wide"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(12 * s)}px`,
+                    lineHeight: `${Math.round(17 * s)}px`,
+                  }}
+                  className="font-moul tracking-wide"
                 >
                   {template.countryHeaderKm1}
                 </div>
                 <div
-                  style={{ color: blueColor }}
-                  className="font-moul text-[11px] leading-[16px] tracking-wide mt-[1px]"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(11 * s)}px`,
+                    lineHeight: `${Math.round(16 * s)}px`,
+                    marginTop: `${Math.round(1 * s)}px`,
+                  }}
+                  className="font-moul tracking-wide"
                 >
                   {template.countryHeaderKm2}
                 </div>
 
                 {/* Flourish: ផ្នែកខាងក្រោមព្រះរាជា */}
-                <div className="flex items-center justify-center my-[2px] h-[17px]">
+                <div
+                  className="flex items-center justify-center my-[2px]"
+                  style={{ height: `${Math.round(17 * s)}px` }}
+                >
                   <img
                     src={flourishSource}
                     alt=""
-                    className="w-[155px] h-[17px] object-contain opacity-95"
+                    style={{
+                      width: `${Math.round(155 * s)}px`,
+                      height: `${Math.round(17 * s)}px`,
+                    }}
+                    className="object-contain opacity-95"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = DEFAULT_FLOURISH_DATA_URI;
                     }}
@@ -306,43 +406,61 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   <img
                     src={emblemSource}
                     alt="MoEYS Emblem"
-                    className="w-[20px] h-[27px] object-contain shrink-0"
+                    style={{
+                      width: `${Math.round(20 * s)}px`,
+                      height: `${Math.round(27 * s)}px`,
+                    }}
+                    className="object-contain shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div
-                      style={{ color: blueColor }}
-                      className="font-battambang font-bold text-[10.5px] leading-[15px] tracking-tight truncate"
+                      style={{
+                        color: blueColor,
+                        fontSize: `${Math.round(10.5 * s)}px`,
+                        lineHeight: `${Math.round(15 * s)}px`,
+                      }}
+                      className="font-battambang font-bold tracking-tight truncate"
                     >
                       {template.ministryDepartment}
                     </div>
                     <div
-                      style={{ color: blueColor }}
-                      className="font-battambang text-[9.5px] leading-[14px] tracking-tight flex items-baseline gap-1 mt-[1px]"
+                      style={{
+                        color: blueColor,
+                        fontSize: `${Math.round(9.5 * s)}px`,
+                        lineHeight: `${Math.round(14 * s)}px`,
+                      }}
+                      className="font-battambang tracking-tight flex items-baseline gap-1 mt-[1px]"
                     >
                       <span className="shrink-0 font-semibold">អនុ/វិទ្យាល័យ</span>
-                      <span className="flex-1 truncate">
-                        {displaySchoolName ? (
-                          <span className="font-bold text-[10.5px]">{displaySchoolName}</span>
-                        ) : (
-                          <span className="tracking-[2px] font-normal opacity-70 text-[8.5px]">
-                            ...................................................
-                          </span>
-                        )}
-                      </span>
+                      {displaySchoolName ? (
+                        <span
+                          className="font-bold truncate"
+                          style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        >
+                          {displaySchoolName}
+                        </span>
+                      ) : (
+                        renderDottedLine()
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* 2. Photo Box on Left & Title/Fields on Right (Standalone photo box matching reference) */}
-              <div className="flex items-stretch mt-[4px] gap-2">
-                {/* 3x4 Photo Box on Left (with standard margins and thin blue border) */}
+              {/* 2. Photo Box on Left & Title/Fields on Right */}
+              <div
+                className="flex items-stretch gap-2"
+                style={{ marginTop: `${Math.round(4 * s)}px` }}
+              >
+                {/* 3x4 Photo Box on Left: Strictly 3:4 ratio */}
                 <div
                   style={{
                     borderColor: blueColor,
-                    borderWidth: '1.2px',
+                    borderWidth: `${Math.max(1, 1.2 * s)}px`,
+                    width: `${Math.round(84 * s)}px`,
+                    height: `${Math.round(112 * s)}px`, // 84:112 = 3:4
                   }}
-                  className="w-[84px] h-[112px] border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
+                  className="border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
                 >
                   {student?.photoUrl ? (
                     <img
@@ -352,37 +470,54 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     />
                   ) : (
                     <div
-                      style={{ color: blueColor }}
-                      className="text-[13px] font-bold font-sans tracking-wider opacity-70"
+                      style={{ color: blueColor, fontSize: `${Math.round(13 * s)}px` }}
+                      className="font-bold font-sans tracking-wider opacity-70"
                     >
                       {template.photoBoxText || '3 x 4'}
                     </div>
                   )}
                 </div>
 
-                {/* Right of Photo Box: Title + 5 rows */}
+                {/* Right of Photo Box: Title + 3 rows */}
                 <div className="flex-1 flex flex-col justify-between py-[1px] min-w-0">
                   <div className="text-center">
                     <div
-                      style={{ color: blueColor }}
-                      className="font-moul text-[11.5px] leading-[17px] tracking-normal"
+                      style={{
+                        color: blueColor,
+                        fontSize: `${Math.round(11.5 * s)}px`,
+                        lineHeight: `${Math.round(17 * s)}px`,
+                      }}
+                      className="font-moul tracking-normal"
                     >
                       {template.cardTitleKm}
                     </div>
                     <div
-                      style={{ color: blueColor }}
-                      className="text-[9.5px] leading-tight flex items-center justify-center gap-1 mt-[1px]"
+                      style={{
+                        color: blueColor,
+                        fontSize: `${Math.round(9.5 * s)}px`,
+                        marginTop: `${Math.round(1 * s)}px`,
+                      }}
+                      className="leading-tight flex items-center justify-center gap-1"
                     >
                       <span className="font-medium">{template.cardNumberPrefix}</span>
                       {cardNumber ? (
-                        <span className="font-bold text-[10.5px]">{cardNumber}</span>
+                        <span
+                          className="font-bold"
+                          style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        >
+                          {cardNumber}
+                        </span>
                       ) : (
                         <span className="font-normal opacity-70">........................</span>
                       )}
                     </div>
                     <div
-                      style={{ color: blueColor }}
-                      className="text-[9px] leading-tight text-center mt-[1px]"
+                      style={{
+                        color: blueColor,
+                        fontSize: `${Math.round(9 * s)}px`,
+                        marginTop: `${Math.round(1 * s)}px`,
+                      }}
+                      className="leading-tight text-center"
                     >
                       {academicYear ? (
                         <span>
@@ -394,65 +529,75 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     </div>
                   </div>
 
-                  {/* 3 rows beside photo: BOLD Important Fields & NO DOTS when filled */}
+                  {/* 3 rows beside photo */}
                   <div
-                    style={{ color: blueColor }}
-                    className="space-y-[3.5px] text-[9.5px] leading-[15px]"
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(9.5 * s)}px`,
+                      lineHeight: `${Math.round(15 * s)}px`,
+                      gap: `${Math.round(3.5 * s)}px`,
+                    }}
+                    className="flex flex-col"
                   >
                     <div className="flex items-baseline">
-                      <span className="shrink-0 font-medium text-[9.5px]">គោត្តនាម-នាមៈ</span>
-                      <span className="flex-1 pl-1 truncate">
-                        {nameKm ? (
-                          <span className="font-bold text-[11px] tracking-wide">{nameKm}</span>
-                        ) : (
-                          <span className="font-normal opacity-70 text-[8.5px]">........................</span>
-                        )}
-                      </span>
+                      <span className="shrink-0 font-medium">គោត្តនាម-នាមៈ</span>
+                      {nameKm ? (
+                        <span
+                          className="font-bold tracking-wide pl-1 truncate"
+                          style={{ fontSize: `${Math.round(11 * s)}px` }}
+                        >
+                          {nameKm}
+                        </span>
+                      ) : (
+                        renderDottedLine()
+                      )}
                     </div>
                     {/* Row 2: ភេទ & សញ្ជាតិ */}
-                    <div className="flex items-baseline text-[9.5px]">
-                      <div className="flex items-baseline w-[56px] shrink-0">
+                    <div className="flex items-baseline">
+                      <div
+                        className="flex items-baseline shrink-0"
+                        style={{ width: `${Math.round(56 * s)}px` }}
+                      >
                         <span className="shrink-0 font-medium">ភេទ</span>
-                        <span className="pl-1 truncate">
-                          {gender ? (
-                            <span className="font-bold text-[10px]">{gender}</span>
-                          ) : (
-                            <span className="font-normal opacity-70 text-[8.5px]">......</span>
-                          )}
+                        <span
+                          className="pl-1 truncate font-bold"
+                          style={{ fontSize: `${Math.round(10 * s)}px` }}
+                        >
+                          {gender || '...'}
                         </span>
                       </div>
                       <div className="flex items-baseline flex-1 min-w-0">
                         <span className="shrink-0 font-medium">សញ្ជាតិ</span>
-                        <span className="pl-1 truncate">
-                          {nationality ? (
-                            <span className="font-bold text-[10px]">{nationality}</span>
-                          ) : (
-                            <span className="font-normal opacity-70 text-[8.5px]">......</span>
-                          )}
+                        <span
+                          className="pl-1 truncate font-bold"
+                          style={{ fontSize: `${Math.round(10 * s)}px` }}
+                        >
+                          {nationality || 'ខ្មែរ'}
                         </span>
                       </div>
                     </div>
 
                     {/* Row 3: ថ្នាក់ទី & អត្តលេខ */}
-                    <div className="flex items-baseline text-[9.5px]">
-                      <div className="flex items-baseline w-[56px] shrink-0">
+                    <div className="flex items-baseline">
+                      <div
+                        className="flex items-baseline shrink-0"
+                        style={{ width: `${Math.round(56 * s)}px` }}
+                      >
                         <span className="shrink-0 font-medium">ថ្នាក់ទី</span>
-                        <span className="pl-1 truncate">
-                          {studentClass ? (
-                            <span className="font-bold text-[10.5px] font-sans">{studentClass}</span>
-                          ) : (
-                            <span className="font-normal opacity-70 text-[8.5px]">......</span>
-                          )}
+                        <span
+                          className="pl-1 truncate font-bold font-sans"
+                          style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        >
+                          {studentClass || '...'}
                         </span>
                       </div>
                       <div className="flex items-baseline flex-1 min-w-0">
                         <span className="shrink-0 font-medium">អត្តលេខៈ</span>
-                        <span className="pl-1 truncate">
-                          {studentId ? (
-                            <span className="font-bold text-[9.5px] font-sans">{studentId}</span>
-                          ) : (
-                            <span className="font-normal opacity-70 text-[8.5px]">......</span>
-                          )}
+                        <span
+                          className="pl-1 truncate font-bold font-sans"
+                          style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                        >
+                          {studentId || '...'}
                         </span>
                       </div>
                     </div>
@@ -460,122 +605,196 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 </div>
               </div>
 
-              {/* 3. 5 Full Width Lines below Photo Box: BOLD Important Values & NO DOTS when filled */}
+              {/* 3. 5 Full Width Lines below Photo Box */}
               <div
-                style={{ color: blueColor }}
-                className="flex flex-col gap-[7px] text-[9.5px] leading-[15px] mt-[8px]"
+                style={{
+                  color: blueColor,
+                  fontSize: `${Math.round(9.5 * s)}px`,
+                  lineHeight: `${Math.round(15 * s)}px`,
+                  gap: `${Math.round(6 * s)}px`,
+                  marginTop: `${Math.round(6 * s)}px`,
+                }}
+                className="flex flex-col"
               >
                 <div className="flex items-baseline">
-                  <span className="shrink-0 font-medium text-[9.5px]">ថ្ងៃខែឆ្នាំកំណើតៈ</span>
-                  <span className="flex-1 pl-1 truncate">
-                    {dob ? (
-                      <span className="font-bold text-[11px] font-sans">{dob}</span>
-                    ) : (
-                      <span className="font-normal opacity-70 text-[8.5px]">....................................................................</span>
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-baseline">
-                  <span className="shrink-0 font-medium text-[9.5px]">ទីកន្លែងកំណើតៈ</span>
-                  <span className="flex-1 pl-1 truncate">
-                    {pob ? (
-                      <span className="font-semibold text-[10px]">{pob}</span>
-                    ) : (
-                      <span className="opacity-70 text-[8.5px]">....................................................................</span>
-                    )}
-                  </span>
-                </div>
-                {/* ឪពុកឈ្មោះ & មុខរបរ (មុខរបរ shifted left, aligned at ~52%) */}
-                <div className="flex items-baseline">
-                  <div className="flex items-baseline w-[152px]">
-                    <span className="shrink-0 font-medium text-[9.5px]">ឪពុកឈ្មោះៈ</span>
-                    <span className="pl-1 truncate flex-1">
-                      {fatherName ? (
-                        <span className="font-bold text-[10.5px]">{fatherName}</span>
-                      ) : (
-                        <span className="opacity-70 text-[8.5px]">..........................</span>
-                      )}
+                  <span className="shrink-0 font-medium">ថ្ងៃខែឆ្នាំកំណើតៈ</span>
+                  {dob ? (
+                    <span
+                      className="font-bold font-sans pl-1 truncate"
+                      style={{ fontSize: `${Math.round(11 * s)}px` }}
+                    >
+                      {dob}
                     </span>
+                  ) : (
+                    renderDottedLine()
+                  )}
+                </div>
+                <div className="flex items-baseline">
+                  <span className="shrink-0 font-medium">ទីកន្លែងកំណើតៈ</span>
+                  {pob ? (
+                    <span
+                      className="font-semibold pl-1 truncate"
+                      style={{ fontSize: `${Math.round(10 * s)}px` }}
+                    >
+                      {pob}
+                    </span>
+                  ) : (
+                    renderDottedLine()
+                  )}
+                </div>
+                {/* ឪពុកឈ្មោះ & មុខរបរ */}
+                <div className="flex items-baseline">
+                  <div
+                    className="flex items-baseline shrink-0"
+                    style={{ width: `${Math.round(150 * s)}px` }}
+                  >
+                    <span className="shrink-0 font-medium">ឪពុកឈ្មោះៈ</span>
+                    {fatherName ? (
+                      <span
+                        className="font-bold pl-1 truncate"
+                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                      >
+                        {fatherName}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                   <div className="flex items-baseline flex-1 min-w-0 pl-1">
-                    <span className="shrink-0 font-medium text-[9.5px]">មុខរបរ</span>
-                    <span className="pl-1 truncate flex-1">
-                      {fatherJob ? (
-                        <span className="font-bold text-[10.5px]">{fatherJob}</span>
-                      ) : (
-                        <span className="opacity-70 text-[8.5px]">....................</span>
-                      )}
-                    </span>
+                    <span className="shrink-0 font-medium">មុខរបរ</span>
+                    {fatherJob ? (
+                      <span
+                        className="font-bold pl-1 truncate"
+                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                      >
+                        {fatherJob}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                 </div>
-                {/* ម្តាយឈ្មោះ & មុខរបរ (មុខរបរ shifted left, aligned at ~52%) */}
+                {/* ម្តាយឈ្មោះ & មុខរបរ */}
                 <div className="flex items-baseline">
-                  <div className="flex items-baseline w-[152px]">
-                    <span className="shrink-0 font-medium text-[9.5px]">ម្តាយឈ្មោះៈ</span>
-                    <span className="pl-1 truncate flex-1">
-                      {motherName ? (
-                        <span className="font-bold text-[10.5px]">{motherName}</span>
-                      ) : (
-                        <span className="opacity-70 text-[8.5px]">..........................</span>
-                      )}
-                    </span>
+                  <div
+                    className="flex items-baseline shrink-0"
+                    style={{ width: `${Math.round(150 * s)}px` }}
+                  >
+                    <span className="shrink-0 font-medium">ម្តាយឈ្មោះៈ</span>
+                    {motherName ? (
+                      <span
+                        className="font-bold pl-1 truncate"
+                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                      >
+                        {motherName}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                   <div className="flex items-baseline flex-1 min-w-0 pl-1">
-                    <span className="shrink-0 font-medium text-[9.5px]">មុខរបរ</span>
-                    <span className="pl-1 truncate flex-1">
-                      {motherJob ? (
-                        <span className="font-bold text-[10.5px]">{motherJob}</span>
-                      ) : (
-                        <span className="opacity-70 text-[8.5px]">....................</span>
-                      )}
-                    </span>
+                    <span className="shrink-0 font-medium">មុខរបរ</span>
+                    {motherJob ? (
+                      <span
+                        className="font-bold pl-1 truncate"
+                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                      >
+                        {motherJob}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                 </div>
                 <div className="flex items-baseline">
-                  <span className="shrink-0 font-medium text-[9.5px]">ទីលំនៅបច្ចុប្បន្នៈ</span>
-                  <span className="flex-1 pl-1 truncate">
-                    {address ? (
-                      <span className="font-semibold text-[10px]">{address}</span>
-                    ) : (
-                      <span className="opacity-70 text-[8.5px]">....................................................................</span>
-                    )}
-                  </span>
+                  <span className="shrink-0 font-medium">ទីលំនៅបច្ចុប្បន្នៈ</span>
+                  {address ? (
+                    <span
+                      className="font-semibold pl-1 truncate"
+                      style={{ fontSize: `${Math.round(10 * s)}px` }}
+                    >
+                      {address}
+                    </span>
+                  ) : (
+                    renderDottedLine()
+                  )}
                 </div>
               </div>
 
-              {/* 4. FOOTER SIGNATURES & NAME AREA (កន្លែងសរសេរ & ឈ្មោះពីក្រោម) */}
+              {/* 4. FOOTER SIGNATURES & NAME AREA (Always anchored at bottom) */}
               <div
-                style={{ color: blueColor }}
-                className="pt-3 text-[9px] leading-tight flex flex-col justify-end mt-auto pb-1"
+                style={{
+                  color: blueColor,
+                  fontSize: `${Math.round(9 * s)}px`,
+                  marginTop: 'auto',
+                  paddingTop: `${Math.round(6 * s)}px`,
+                }}
+                className="leading-tight flex flex-col justify-end"
               >
                 <div className="flex justify-between items-start">
                   {/* Left: Director Signature Block */}
-                  <div className="text-center w-[135px] flex flex-col items-center">
+                  <div
+                    className="text-center flex flex-col items-center"
+                    style={{ width: `${Math.round(135 * s)}px` }}
+                  >
                     <div>{template.issueDateLine}</div>
-                    <div className="font-battambang font-bold text-[10.5px] mt-[2px]">
+                    <div
+                      className="font-battambang font-bold mt-[2px]"
+                      style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                    >
                       {template.directorTitle}
                     </div>
                     {/* Dedicated writing & stamping space */}
-                    <div className="h-[34px] w-full flex items-center justify-center">
-                      <div className="w-[90px] border-b border-dotted border-current opacity-30" />
+                    <div
+                      className="w-full flex items-center justify-center"
+                      style={{ height: `${Math.round(32 * s)}px` }}
+                    >
+                      <div
+                        className="border-b border-dotted border-current opacity-30"
+                        style={{ width: `${Math.round(90 * s)}px` }}
+                      />
                     </div>
                     {/* Name underneath */}
-                    <div className="font-battambang font-bold text-[10.5px] tracking-wide text-center">
+                    <div
+                      className="font-battambang font-bold tracking-wide text-center"
+                      style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                    >
                       {template.directorName || 'ជា សារ៉ា'}
                     </div>
                   </div>
 
                   {/* Right: Student Signature Block */}
-                  <div className="text-center w-[125px] flex flex-col items-center pt-[15px]">
-                    <div className="font-battambang font-medium text-[9.5px]">
+                  <div
+                    className="text-center flex flex-col items-center"
+                    style={{
+                      width: `${Math.round(125 * s)}px`,
+                      paddingTop: `${Math.round(14 * s)}px`,
+                    }}
+                  >
+                    <div
+                      className="font-battambang font-medium"
+                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                    >
                       {template.signatureTitle}
                     </div>
                     {/* Dedicated student writing/signing space */}
-                    <div className="h-[34px] w-full flex items-center justify-center">
-                      <div className="w-[90px] border-b border-dotted border-current opacity-40" />
+                    <div
+                      className="w-full flex items-center justify-center"
+                      style={{ height: `${Math.round(32 * s)}px` }}
+                    >
+                      <div
+                        className="border-b border-dotted border-current opacity-40"
+                        style={{ width: `${Math.round(90 * s)}px` }}
+                      />
                     </div>
                     {/* Name underneath */}
-                    <div className="font-battambang font-bold text-[10px] truncate max-w-[115px] text-center">
+                    <div
+                      className="font-battambang font-bold truncate text-center"
+                      style={{
+                        fontSize: `${Math.round(10 * s)}px`,
+                        maxWidth: `${Math.round(115 * s)}px`,
+                      }}
+                    >
                       {nameKm || <span className="opacity-60 font-normal">........................</span>}
                     </div>
                   </div>
@@ -585,33 +804,55 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* VARIANT 2: BOTTOM-PHOTO (Battambang Style from Reference) */}
+          {/* 3. VARIANT 2: BOTTOM-PHOTO (Battambang Style)             */}
           {/* ======================================================== */}
           {!isLandscape && isBottomPhoto && (
             <div className="relative z-10 flex flex-col h-full justify-between">
               <div className="text-center pt-[1px]">
                 <div
-                  style={{ color: blueColor }}
-                  className="font-moul text-[10.5px] leading-[15px] tracking-wide"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(10.5 * s)}px`,
+                    lineHeight: `${Math.round(15 * s)}px`,
+                  }}
+                  className="font-moul tracking-wide"
                 >
                   {template.countryHeaderKm1}
                 </div>
                 <div
-                  style={{ color: blueColor }}
-                  className="font-moul text-[9.5px] leading-[14px] tracking-wide mt-[2px]"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(9.5 * s)}px`,
+                    lineHeight: `${Math.round(14 * s)}px`,
+                    marginTop: `${Math.round(2 * s)}px`,
+                  }}
+                  className="font-moul tracking-wide"
                 >
                   {template.countryHeaderKm2}
                 </div>
 
                 <div className="flex items-center justify-center gap-1.5 my-[2px] opacity-90">
                   <span
-                    style={{ backgroundColor: blueColor }}
-                    className="w-10 h-[1px] inline-block"
+                    style={{
+                      backgroundColor: blueColor,
+                      width: `${Math.round(40 * s)}px`,
+                      height: '1px',
+                    }}
+                    className="inline-block"
                   />
-                  <span className="text-[10px] font-bold">៚</span>
                   <span
-                    style={{ backgroundColor: blueColor }}
-                    className="w-10 h-[1px] inline-block"
+                    className="font-bold"
+                    style={{ fontSize: `${Math.round(10 * s)}px` }}
+                  >
+                    ៚
+                  </span>
+                  <span
+                    style={{
+                      backgroundColor: blueColor,
+                      width: `${Math.round(40 * s)}px`,
+                      height: '1px',
+                    }}
+                    className="inline-block"
                   />
                 </div>
 
@@ -619,27 +860,46 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   <img
                     src={emblemSource}
                     alt="MoEYS Emblem"
-                    className="w-[24px] h-[28px] object-contain shrink-0"
+                    style={{
+                      width: `${Math.round(24 * s)}px`,
+                      height: `${Math.round(28 * s)}px`,
+                    }}
+                    className="object-contain shrink-0"
                   />
                   <div
-                    style={{ color: blueColor }}
-                    className="font-battambang font-bold text-[9px] leading-[13px] tracking-tight"
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(9 * s)}px`,
+                      lineHeight: `${Math.round(13 * s)}px`,
+                    }}
+                    className="font-battambang font-bold tracking-tight"
                   >
                     {template.ministryDepartment}
                   </div>
                 </div>
               </div>
 
-              <div className="text-center my-[3px]">
+              <div
+                className="text-center"
+                style={{ margin: `${Math.round(2 * s)}px 0` }}
+              >
                 <div
-                  style={{ color: blueColor }}
-                  className="font-moul text-[13px] leading-[18px] tracking-wide"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(13 * s)}px`,
+                    lineHeight: `${Math.round(18 * s)}px`,
+                  }}
+                  className="font-moul tracking-wide"
                 >
                   {template.cardTitleKm}
                 </div>
                 <div
-                  style={{ color: blueColor }}
-                  className="text-[9px] font-battambang mt-[1px]"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(9 * s)}px`,
+                    marginTop: `${Math.round(1 * s)}px`,
+                  }}
+                  className="font-battambang"
                 >
                   {academicYear ? (
                     <span>ឆ្នាំសិក្សា {academicYear}</span>
@@ -648,94 +908,126 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   )}
                 </div>
                 <div
-                  style={{ color: blueColor }}
-                  className="font-moul text-[11px] leading-[16px] mt-[1px]"
+                  style={{
+                    color: blueColor,
+                    fontSize: `${Math.round(11 * s)}px`,
+                    lineHeight: `${Math.round(16 * s)}px`,
+                    marginTop: `${Math.round(1 * s)}px`,
+                  }}
+                  className="font-moul"
                 >
                   ថ្នាក់ទី {studentClass || '12 "A"'}
                 </div>
               </div>
 
               <div
-                style={{ color: blueColor }}
-                className="space-y-[4px] text-[9px] leading-[16px] my-[2px] px-1"
+                style={{
+                  color: blueColor,
+                  fontSize: `${Math.round(9 * s)}px`,
+                  lineHeight: `${Math.round(15 * s)}px`,
+                  gap: `${Math.round(4 * s)}px`,
+                }}
+                className="flex flex-col px-1 my-[2px]"
               >
                 <div className="flex items-baseline justify-between">
                   <div className="flex items-baseline flex-1">
-                    <span className="shrink-0 font-medium text-[9.5px]">គោត្តនាម នាម</span>
-                    <span className="flex-1 pl-2 truncate">
-                      {nameKm ? (
-                        <span className="font-bold text-[12px]">{nameKm}</span>
-                      ) : (
-                        <span className="font-normal opacity-70 text-[8px]">........................</span>
-                      )}
-                    </span>
+                    <span className="shrink-0 font-medium">គោត្តនាម នាម</span>
+                    {nameKm ? (
+                      <span
+                        className="font-bold pl-2 truncate"
+                        style={{ fontSize: `${Math.round(12 * s)}px` }}
+                      >
+                        {nameKm}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                   <div className="flex items-baseline gap-1 pl-3">
-                    <span className="shrink-0 font-medium text-[9.5px]">ភេទ</span>
-                    <span className="w-[35px] text-center">
-                      {gender ? (
-                        <span className="font-bold text-[10px]">{gender}</span>
-                      ) : (
-                        <span className="font-normal opacity-70 text-[8px]">......</span>
-                      )}
+                    <span className="shrink-0 font-medium">ភេទ</span>
+                    <span
+                      className="text-center font-bold"
+                      style={{
+                        width: `${Math.round(35 * s)}px`,
+                        fontSize: `${Math.round(10 * s)}px`,
+                      }}
+                    >
+                      {gender || '...'}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-baseline">
-                  <span className="shrink-0 font-medium text-[9.5px]">ថ្ងៃខែឆ្នាំកំណើតៈ</span>
-                  <span className="flex-1 pl-2 truncate">
-                    {dob ? (
-                      <span className="font-bold text-[11px] font-sans">{dob}</span>
-                    ) : (
-                      <span className="font-normal opacity-70 text-[8px]">................................................</span>
-                    )}
-                  </span>
+                  <span className="shrink-0 font-medium">ថ្ងៃខែឆ្នាំកំណើតៈ</span>
+                  {dob ? (
+                    <span
+                      className="font-bold font-sans pl-2 truncate"
+                      style={{ fontSize: `${Math.round(11 * s)}px` }}
+                    >
+                      {dob}
+                    </span>
+                  ) : (
+                    renderDottedLine()
+                  )}
                 </div>
 
                 <div className="flex items-baseline">
-                  <span className="shrink-0 font-medium text-[9.5px]">ទីកន្លែងកំណើតៈ</span>
-                  <span className="flex-1 pl-2 truncate">
-                    {pob ? (
-                      <span className="font-semibold text-[9.5px]">{pob}</span>
-                    ) : (
-                      <span className="opacity-70 text-[8px]">................................................</span>
-                    )}
-                  </span>
+                  <span className="shrink-0 font-medium">ទីកន្លែងកំណើតៈ</span>
+                  {pob ? (
+                    <span
+                      className="font-semibold pl-2 truncate"
+                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                    >
+                      {pob}
+                    </span>
+                  ) : (
+                    renderDottedLine()
+                  )}
                 </div>
 
                 <div className="flex items-baseline justify-between">
                   <div className="flex items-baseline flex-1">
-                    <span className="shrink-0 font-medium text-[9.5px]">ឪពុកឈ្មោះៈ</span>
-                    <span className="flex-1 pl-2 truncate">
-                      {fatherName ? (
-                        <span className="font-semibold text-[9.5px]">{fatherName}</span>
-                      ) : (
-                        <span className="opacity-70 text-[8px]">....................</span>
-                      )}
-                    </span>
+                    <span className="shrink-0 font-medium">ឪពុកឈ្មោះៈ</span>
+                    {fatherName ? (
+                      <span
+                        className="font-semibold pl-2 truncate"
+                        style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                      >
+                        {fatherName}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                   <div className="flex items-baseline flex-1 pl-2">
-                    <span className="shrink-0 font-medium text-[9.5px]">ម្តាយឈ្មោះៈ</span>
-                    <span className="flex-1 pl-2 truncate">
-                      {motherName ? (
-                        <span className="font-semibold text-[9.5px]">{motherName}</span>
-                      ) : (
-                        <span className="opacity-70 text-[8px]">....................</span>
-                      )}
-                    </span>
+                    <span className="shrink-0 font-medium">ម្តាយឈ្មោះៈ</span>
+                    {motherName ? (
+                      <span
+                        className="font-semibold pl-2 truncate"
+                        style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                      >
+                        {motherName}
+                      </span>
+                    ) : (
+                      renderDottedLine()
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Section */}
-              <div className="flex items-end gap-3 pt-2 mt-auto">
+              {/* Bottom Section: Photo Box Strictly 3:4 & Director Block */}
+              <div
+                className="flex items-end gap-3 mt-auto"
+                style={{ paddingTop: `${Math.round(4 * s)}px` }}
+              >
                 <div
                   style={{
                     borderColor: blueColor,
-                    borderWidth: '1.2px',
+                    borderWidth: `${Math.max(1, 1.2 * s)}px`,
+                    width: `${Math.round(84 * s)}px`,
+                    height: `${Math.round(112 * s)}px`, // Strictly 3:4 ratio (84:112)
                   }}
-                  className="w-[84px] h-[106px] border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
+                  className="border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
                 >
                   {student?.photoUrl ? (
                     <img
@@ -745,37 +1037,61 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     />
                   ) : (
                     <div
-                      style={{ color: blueColor }}
-                      className="text-[12px] font-bold font-sans tracking-wider opacity-70"
+                      style={{ color: blueColor, fontSize: `${Math.round(12 * s)}px` }}
+                      className="font-bold font-sans tracking-wider opacity-70"
                     >
                       {template.photoBoxText || '3 x 4'}
                     </div>
                   )}
                 </div>
 
-                <div
-                  style={{ color: blueColor }}
-                  className="flex-1 text-center flex flex-col justify-between h-[106px] pb-1"
-                >
-                  <div className="space-y-[2px] text-[8.5px]">
-                    <div className="font-battambang font-medium">
-                      {template.studentDeclaration || `ជាសិស្ស ${template.schoolNameOnly || 'វិទ្យាល័យ អន្លង់វិល'}`}
-                    </div>
-                    <div>{template.issueDateLine}</div>
+                <div className="flex-1 flex flex-col justify-end text-center pb-0.5">
+                  <div
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(9.5 * s)}px`,
+                    }}
+                    className="font-battambang font-medium"
+                  >
+                    {template.studentDeclaration || 'ជាសិស្ស អនុវិទ្យាល័យ ដំណាក់ព្រីង'}
                   </div>
-
-                  <div className="flex-1 flex items-center justify-center min-h-[30px]">
-                    <div className="w-[85px] border-b border-dotted border-current opacity-30" />
+                  <div
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(8.5 * s)}px`,
+                      marginTop: `${Math.round(3 * s)}px`,
+                    }}
+                  >
+                    {template.issueDateLine}
                   </div>
-
-                  <div className="font-moul text-[9.5px]">
-                    {template.directorTitle || 'នាយកសាលា'}
+                  <div
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(10.5 * s)}px`,
+                      marginTop: `${Math.round(2 * s)}px`,
+                    }}
+                    className="font-battambang font-bold"
+                  >
+                    {template.directorTitle}
                   </div>
-                  {template.directorName && (
-                    <div className="font-battambang font-bold text-[9px] mt-0.5 tracking-wide">
-                      {template.directorName}
-                    </div>
-                  )}
+                  <div
+                    className="w-full flex items-center justify-center"
+                    style={{ height: `${Math.round(30 * s)}px` }}
+                  >
+                    <div
+                      className="border-b border-dotted border-current opacity-30"
+                      style={{ width: `${Math.round(85 * s)}px` }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      color: blueColor,
+                      fontSize: `${Math.round(10.5 * s)}px`,
+                    }}
+                    className="font-battambang font-bold tracking-wide"
+                  >
+                    {template.directorName || 'ជា សារ៉ា'}
+                  </div>
                 </div>
               </div>
             </div>

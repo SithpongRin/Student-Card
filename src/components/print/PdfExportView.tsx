@@ -129,7 +129,7 @@ export const PdfExportView: React.FC = () => {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -141,7 +141,7 @@ export const PdfExportView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <AppleButton
             variant="secondary"
             size="sm"
@@ -436,7 +436,7 @@ export const PdfExportView: React.FC = () => {
         </div>
 
         {/* The A4 Canvas Sheet Representation */}
-        <div className="relative bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-black/[0.08] rounded-xl p-6 overflow-hidden flex flex-col items-center justify-center">
+        <div className="w-full max-w-full overflow-x-auto relative bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-black/[0.08] rounded-xl p-3 sm:p-6 flex flex-col items-center justify-center">
           <div className="absolute top-2 left-3 text-[10px] text-[#86868b] font-mono">
             ក្រដាស A4 (210 × 297 mm) | មាត្រដ្ឋានបោះពុម្ព ១០០%
           </div>
