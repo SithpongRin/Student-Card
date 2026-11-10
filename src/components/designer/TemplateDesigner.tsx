@@ -102,7 +102,7 @@ export const TemplateDesigner: React.FC = () => {
         <h3 className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
           ជ្រើសរើសគំរូកាត (Select Card Template):
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {PREDEFINED_TEMPLATES.map((tpl, idx) => {
             const isSelected = currentTemplate.id === tpl.id;
             return (
@@ -454,22 +454,9 @@ export const TemplateDesigner: React.FC = () => {
                   </div>
                 </div>
 
-                {/* School Phone for Back Side */}
+                {/* Barcode / QR Code for Back Side */}
                 {(currentTemplate.backLayout || 'rules-and-emblem') !== 'emblem-only' && (
                   <div className="space-y-3">
-                    <div>
-                      <label className="block font-medium text-[#1d1d1f] mb-1">
-                        លេខទូរស័ព្ទទំនាក់ទំនងសាលារៀន (School Contact Phone)
-                      </label>
-                      <input
-                        type="text"
-                        value={currentTemplate.backSchoolPhone || ''}
-                        onChange={(e) => updateTemplateField('backSchoolPhone', e.target.value)}
-                        placeholder="ឧ. 023 880 880 / 012 345 678"
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-black/[0.08] focus:ring-2 focus:ring-[#0071e3] focus:outline-none text-xs"
-                      />
-                    </div>
-
                     <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#f5f5f7]">
                       <div>
                         <span className="font-semibold text-[#1d1d1f]">

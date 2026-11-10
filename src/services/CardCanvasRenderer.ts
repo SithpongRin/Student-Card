@@ -582,61 +582,91 @@ export async function renderFrontCardToCanvas(
 
     // 7. FOOTER SIGNATURES & NAMES AREA
     // Strictly anchored with safe bottom buffer and descender room so Director Name (ឈ្មោះនាយក) is NEVER cut off!
-    const footerH = 48 * sRatio;
+    const footerH = 46 * sRatio;
     const innerBottom = by + bh - innerPad;
-    // Generous clamp so director name with Khmer sub-scripts (ជើងអក្សរ & ស្រៈក្រោម) has ample breathing room above inner border
+    // Generous clamp so director name with Khmer sub-scripts (ជើងអក្សរ & ស្រៈក្រោម) has >6.5 base units of clear room
     const maxAllowedYDate = innerBottom - 46 * sRatio;
     const targetFooterY = innerBottom - footerH;
     const yDate = Math.min(Math.max(fullY + 3 * sRatio, targetFooterY), maxAllowedYDate);
     const fFooter = Math.round(8.5 * sRatio);
 
-    // Left: Director Signature Block (កាលបរិច្ឆេទ, តួនាទី, កន្លែងចុះហត្ថលេខា/ត្រា, ឈ្មោះនាយក)
-    const dirCenterX = cx + 60 * sRatio;
-    ctx.textAlign = 'center';
-    ctx.font = `normal ${fFooter}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(template.issueDateLine, dirCenterX, yDate);
+    // Detect if right side represents Director or Student
+    const rightIsDirector =
+      (template.signatureTitle && (
+        template.signatureTitle.includes('នាយក') ||
+        template.signatureTitle.includes('រដ្ឋបាល')
+      )) ||
+      (template.directorTitle && (
+        template.directorTitle.includes('ស្នាមមេដៃ') ||
+        template.directorTitle.includes('សាមីខ្លួន')
+      ));
 
+    const leftTitle = rightIsDirector ? (template.directorTitle || 'ស្នាមមេដៃស្ដាំ') : (template.directorTitle || 'នាយក');
+    const leftName = rightIsDirector ? (student?.nameKm || '') : (template.directorName || 'ជា សារ៉ា');
+
+    const rightTitle = rightIsDirector ? (template.signatureTitle || 'ហត្ថលេខានាយក/រដ្ឋបាល') : (template.signatureTitle || 'ហត្ថលេខាសាមីខ្លួន');
+    const rightName = rightIsDirector ? (template.directorName || 'ជា សារ៉ា') : (student?.nameKm || '');
+
+    // Left block center & Right block center
+    const leftCenterX = cx + 58 * sRatio;
+    const rightCenterX = cx + cw - 58 * sRatio;
+
+    // Issue date line is placed above the Director's signature
+    if (!rightIsDirector) {
+      ctx.textAlign = 'center';
+      ctx.font = `normal ${fFooter}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(template.issueDateLine || 'ថ្ងៃទី.........ខែ.........ឆ្នាំ២០......', leftCenterX, yDate);
+    } else {
+      ctx.textAlign = 'center';
+      ctx.font = `normal ${fFooter}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(template.issueDateLine || 'ថ្ងៃទី.........ខែ.........ឆ្នាំ២០......', rightCenterX, yDate);
+    }
+
+    // Left Title
+    const leftTitleY = !rightIsDirector ? yDate + 10 * sRatio : yDate + 10 * sRatio;
     ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(template.directorTitle, dirCenterX, yDate + 10.5 * sRatio);
+    ctx.fillText(leftTitle, leftCenterX, leftTitleY);
 
-    // Dedicated signing line
+    // Left dedicated dotted line
     drawDottedLine(
       ctx,
-      dirCenterX - 38 * sRatio,
-      yDate + 22 * sRatio,
-      dirCenterX + 38 * sRatio,
+      leftCenterX - 36 * sRatio,
+      yDate + 21 * sRatio,
+      leftCenterX + 36 * sRatio,
       blue,
       0.8 * sRatio,
       2,
       4
     );
 
-    // Director name underneath (strictly bounded with >5.5 base units descender safety margin)
-    const dirName = template.directorName || 'ជា សារ៉ា';
-    ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(dirName, dirCenterX, yDate + 30.5 * sRatio);
+    // Left Name underneath (if present)
+    if (leftName) {
+      ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(leftName, leftCenterX, yDate + 29.5 * sRatio);
+    }
 
-    // Right: Student Signature Block (កន្លែងសរសេរ & ឈ្មោះសិស្សពីក្រោម)
-    const stuCenterX = cx + cw - 56 * sRatio;
-    ctx.font = `medium ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(template.signatureTitle, stuCenterX, yDate + 10.5 * sRatio);
+    // Right Title
+    const rightTitleY = rightIsDirector ? yDate + 10 * sRatio : yDate + 10 * sRatio;
+    ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(rightTitle, rightCenterX, rightTitleY);
 
-    // Dedicated signing line
+    // Right dedicated dotted line
     drawDottedLine(
       ctx,
-      stuCenterX - 36 * sRatio,
-      yDate + 22 * sRatio,
-      stuCenterX + 36 * sRatio,
+      rightCenterX - 38 * sRatio,
+      yDate + 21 * sRatio,
+      rightCenterX + 38 * sRatio,
       blue,
       0.8 * sRatio,
       2,
       4
     );
 
-    // Student name underneath
-    const stuName = student?.nameKm || '........................';
-    ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(stuName, stuCenterX, yDate + 30.5 * sRatio);
+    // Right Name underneath (Director Name or Student Name)
+    if (rightName) {
+      ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
+      ctx.fillText(rightName, rightCenterX, yDate + 29.5 * sRatio);
+    }
   }
 
   // ========================================================
@@ -976,46 +1006,35 @@ export async function renderBackCardToCanvas(
     curY += ruleGap;
   }
 
-  // Footer area (pinned near bottom)
-  const footerY = by + bh - innerPad - 22 * sRatio;
-  ctx.strokeStyle = `${blue}40`;
+  // Footer area: Clean separation and centered barcode (No phone numbers)
+  const footerY = by + bh - innerPad - 24 * sRatio;
+  ctx.strokeStyle = `${blue}30`;
   ctx.lineWidth = 0.8 * sRatio;
   ctx.beginPath();
   ctx.moveTo(cx, footerY - 4 * sRatio);
   ctx.lineTo(cx + cw, footerY - 4 * sRatio);
   ctx.stroke();
 
-  // Contact info
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#64748b';
-  ctx.font = `normal ${Math.round(7.5 * sRatio)}px ${FONT_BATTAMBANG}`;
-  ctx.fillText('ទំនាក់ទំនងសាលារៀន៖', cx, footerY + 2 * sRatio);
-
-  const phone = template.backSchoolPhone || '023 880 880 / 012 345 678';
-  ctx.fillStyle = '#0f172a';
-  ctx.font = `bold ${Math.round(8.5 * sRatio)}px sans-serif`;
-  ctx.fillText(phone, cx, footerY + 12 * sRatio);
-
-  // Barcode simulation on right
+  // Barcode simulation centered cleanly at bottom with safe buffer from bottom border
   if (template.showBackBarcodeOrQr) {
-    const barW = Math.round(45 * sRatio);
-    const barH = Math.round(14 * sRatio);
-    const barX = cx + cw - barW;
-    const barY = footerY + 1 * sRatio;
+    const barW = Math.round(52 * sRatio);
+    const barH = Math.round(13 * sRatio);
+    const barX = cx + (cw - barW) / 2;
+    const barY = footerY + 2 * sRatio;
 
     // Draw simulated barcode bars
     ctx.fillStyle = '#0f172a';
-    const numBars = 20;
+    const numBars = 22;
     const step = barW / numBars;
     for (let b = 0; b < numBars; b++) {
       if (b % 3 !== 0) {
-        ctx.fillRect(barX + b * step, barY, step * 0.6, barH);
+        ctx.fillRect(barX + b * step, barY, step * 0.65, barH);
       }
     }
-    ctx.font = `normal ${Math.round(6.5 * sRatio)}px sans-serif`;
+    ctx.font = `bold ${Math.round(7 * sRatio)}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
-    ctx.fillText('MOEYS-ID', barX + barW / 2, barY + barH + 7 * sRatio);
+    ctx.fillText('MOEYS-ID', barX + barW / 2, barY + barH + 6 * sRatio);
   }
 
   return canvas;

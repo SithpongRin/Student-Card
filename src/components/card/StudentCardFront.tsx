@@ -722,81 +722,105 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
               </div>
 
               {/* 4. FOOTER SIGNATURES & NAME AREA (Always anchored at bottom with plenty buffer) */}
-              <div
-                style={{
-                  color: blueColor,
-                  fontSize: `${Math.round(8.5 * s)}px`,
-                  marginTop: 'auto',
-                  paddingTop: `${Math.round(3 * s)}px`,
-                }}
-                className="leading-tight flex flex-col justify-end"
-              >
-                <div className="flex justify-between items-start">
-                  {/* Left: Director Signature Block */}
-                  <div
-                    className="text-center flex flex-col items-center"
-                    style={{ width: `${Math.round(135 * s)}px` }}
-                  >
-                    <div>{template.issueDateLine}</div>
-                    <div
-                      className="font-battambang font-bold mt-[2px]"
-                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
-                    >
-                      {template.directorTitle}
-                    </div>
-                    {/* Dedicated writing & stamping space */}
-                    <div
-                      className="w-full flex items-center justify-center"
-                      style={{ height: `${Math.round(18 * s)}px` }}
-                    >
-                      <div
-                        className="border-b border-dotted border-current opacity-30"
-                        style={{ width: `${Math.round(85 * s)}px` }}
-                      />
-                    </div>
-                    {/* Name underneath */}
-                    <div
-                      className="font-battambang font-bold tracking-wide text-center"
-                      style={{ fontSize: `${Math.round(10 * s)}px` }}
-                    >
-                      {template.directorName || 'ជា សារ៉ា'}
-                    </div>
-                  </div>
+              {(() => {
+                const rightIsDirector =
+                  (template.signatureTitle && (
+                    template.signatureTitle.includes('នាយក') ||
+                    template.signatureTitle.includes('រដ្ឋបាល')
+                  )) ||
+                  (template.directorTitle && (
+                    template.directorTitle.includes('ស្នាមមេដៃ') ||
+                    template.directorTitle.includes('សាមីខ្លួន')
+                  ));
 
-                  {/* Right: Student Signature Block */}
+                const leftTitle = rightIsDirector ? (template.directorTitle || 'ស្នាមមេដៃស្ដាំ') : (template.directorTitle || 'នាយក');
+                const leftName = rightIsDirector ? (nameKm || '') : (template.directorName || 'ជា សារ៉ា');
+
+                const rightTitle = rightIsDirector ? (template.signatureTitle || 'ហត្ថលេខានាយក/រដ្ឋបាល') : (template.signatureTitle || 'ហត្ថលេខាសាមីខ្លួន');
+                const rightName = rightIsDirector ? (template.directorName || 'ជា សារ៉ា') : (nameKm || '');
+
+                return (
                   <div
-                    className="text-center flex flex-col items-center"
                     style={{
-                      width: `${Math.round(125 * s)}px`,
-                      paddingTop: `${Math.round(10 * s)}px`,
+                      color: blueColor,
+                      fontSize: `${Math.round(8.5 * s)}px`,
+                      marginTop: 'auto',
+                      paddingTop: `${Math.round(2 * s)}px`,
                     }}
+                    className="leading-tight flex flex-col justify-end"
                   >
-                    <div
-                      className="font-battambang font-medium"
-                      style={{ fontSize: `${Math.round(9 * s)}px` }}
-                    >
-                      {template.signatureTitle}
-                    </div>
-                    {/* Dedicated student writing/signing space */}
-                    <div
-                      className="w-full flex items-center justify-center"
-                      style={{ height: `${Math.round(18 * s)}px` }}
-                    >
+                    <div className="flex justify-between items-start">
+                      {/* Left Block */}
                       <div
-                        className="border-b border-dotted border-current opacity-30"
-                        style={{ width: `${Math.round(75 * s)}px` }}
-                      />
-                    </div>
-                    {/* Name underneath */}
-                    <div
-                      className="font-battambang font-bold tracking-wide text-center truncate max-w-[120px]"
-                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
-                    >
-                      {nameKm || '........................'}
+                        className="text-center flex flex-col items-center"
+                        style={{
+                          width: `${Math.round(120 * s)}px`,
+                          paddingTop: rightIsDirector ? `${Math.round(9 * s)}px` : 0,
+                        }}
+                      >
+                        {!rightIsDirector && <div>{template.issueDateLine || 'ថ្ងៃទី.........ខែ.........ឆ្នាំ២០......'}</div>}
+                        <div
+                          className="font-battambang font-bold mt-[2px]"
+                          style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                        >
+                          {leftTitle}
+                        </div>
+                        {/* Dedicated space */}
+                        <div
+                          className="w-full flex items-center justify-center"
+                          style={{ height: `${Math.round(18 * s)}px` }}
+                        >
+                          <div
+                            className="border-b border-dotted border-current opacity-30"
+                            style={{ width: `${Math.round(75 * s)}px` }}
+                          />
+                        </div>
+                        {/* Name underneath */}
+                        <div
+                          className="font-battambang font-bold tracking-wide text-center truncate max-w-[115px]"
+                          style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                        >
+                          {leftName}
+                        </div>
+                      </div>
+
+                      {/* Right Block */}
+                      <div
+                        className="text-center flex flex-col items-center"
+                        style={{
+                          width: `${Math.round(135 * s)}px`,
+                          paddingTop: rightIsDirector ? 0 : `${Math.round(9 * s)}px`,
+                        }}
+                      >
+                        {rightIsDirector && <div>{template.issueDateLine || 'ថ្ងៃទី.........ខែ.........ឆ្នាំ២០......'}</div>}
+                        <div
+                          className="font-battambang font-bold mt-[2px]"
+                          style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                        >
+                          {rightTitle}
+                        </div>
+                        {/* Dedicated space */}
+                        <div
+                          className="w-full flex items-center justify-center"
+                          style={{ height: `${Math.round(18 * s)}px` }}
+                        >
+                          <div
+                            className="border-b border-dotted border-current opacity-30"
+                            style={{ width: `${Math.round(85 * s)}px` }}
+                          />
+                        </div>
+                        {/* Name underneath */}
+                        <div
+                          className="font-battambang font-bold tracking-wide text-center truncate max-w-[130px]"
+                          style={{ fontSize: `${Math.round(10 * s)}px` }}
+                        >
+                          {rightName}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           )}
 

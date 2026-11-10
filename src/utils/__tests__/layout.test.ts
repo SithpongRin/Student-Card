@@ -76,18 +76,30 @@ describe('A4 9-Cards Layout & Geometry Calculation', () => {
       const photoY = curY + logoH + 3 * sRatio;
       const fullY = photoY + photoH + 5 * sRatio + 5 * lineGap;
 
-      const footerH = 48 * sRatio;
+      const footerH = 46 * sRatio;
       const maxAllowedYDate = innerBottom - 46 * sRatio;
       const targetFooterY = innerBottom - footerH;
       const yDate = Math.min(Math.max(fullY + 3 * sRatio, targetFooterY), maxAllowedYDate);
 
-      // Director name position
-      const dirNameY = yDate + 30.5 * sRatio;
+      // Director name position (under Director title on right or left)
+      const dirNameY = yDate + 29.5 * sRatio;
       const dirNameBottom = dirNameY + 10 * sRatio; // Font size ~ 10 * sRatio
 
-      // Director name bottom MUST be strictly within innerBottom with safety margin (> 5 base units)
+      // 1. Verify NO overlap: Gap between address line (Line 5) and footer date line
+      const addressLineY = fullY - lineGap;
+      const gapAddressToDate = yDate - addressLineY;
+      expect(gapAddressToDate).toBeGreaterThanOrEqual(20 * sRatio); // Substantial room (no overlap)
+
+      // 2. Director name bottom MUST be strictly within innerBottom with safety margin (>= 6.0 base units)
       expect(dirNameBottom).toBeLessThan(innerBottom);
-      expect(innerBottom - dirNameBottom).toBeGreaterThanOrEqual(5.0 * sRatio);
+      expect(innerBottom - dirNameBottom).toBeGreaterThanOrEqual(6.0 * sRatio);
+
+      // Back side: verify barcode bottom is safely inside innerBottom with no phone number cutoff
+      const backFooterY = innerBottom - 24 * sRatio;
+      const barH = 13 * sRatio;
+      const barcodeBottom = backFooterY + 2 * sRatio + barH + 6 * sRatio;
+      expect(barcodeBottom).toBeLessThan(innerBottom);
+      expect(innerBottom - barcodeBottom).toBeGreaterThanOrEqual(2.0 * sRatio);
     }
   });
 });

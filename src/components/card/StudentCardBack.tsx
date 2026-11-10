@@ -37,7 +37,6 @@ export const StudentCardBack: React.FC<StudentCardBackProps> = ({
   const userRules = (template.backRulesText || []).filter((r) => typeof r === 'string' && r.trim().length > 0);
   const rules = [...userRules, ...DEFAULT_STUDENT_CARD_RULES].slice(0, 5);
 
-  const schoolPhone = template.backSchoolPhone || '023 880 880 / 012 345 678';
   const displaySchool = template.schoolNameOnly || 'សាលារៀនចំណេះទូទៅ';
 
   return (
@@ -112,28 +111,19 @@ export const StudentCardBack: React.FC<StudentCardBackProps> = ({
               ))}
             </div>
 
-            <div className="pt-1.5 mt-auto border-t flex items-center justify-between gap-2" style={{ borderColor: `${blueColor}25` }}>
-              <div className="flex-1 min-w-0 text-left">
-                <div className="font-semibold text-slate-600" style={{ fontSize: `${Math.round(7.5 * s)}px`, lineHeight: `${Math.round(11 * s)}px` }}>
-                  ទំនាក់ទំនងសាលារៀន៖
-                </div>
-                <div className="font-bold text-slate-900 font-sans tracking-wide truncate" style={{ fontSize: `${Math.round(8.5 * s)}px`, lineHeight: `${Math.round(12 * s)}px` }}>
-                  {schoolPhone}
-                </div>
-              </div>
-
+            <div className="pt-2 mt-auto border-t flex items-center justify-center" style={{ borderColor: `${blueColor}25` }}>
               {template.showBackBarcodeOrQr && (
                 <div className="shrink-0 flex flex-col items-center">
-                  <div className="flex items-end gap-[1.5px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" style={{ height: `${Math.round(20 * s)}px` }}>
+                  <div className="flex items-end gap-[1.5px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200" style={{ height: `${Math.round(18 * s)}px` }}>
                     {[16, 20, 14, 20, 10, 18, 20, 12, 16, 20, 14, 18, 20, 15, 20].map((h, i) => (
                       <div
                         key={i}
                         className="bg-slate-900 rounded-sm"
-                        style={{ width: `${Math.max(1, Math.round(1.2 * s))}px`, height: `${Math.round((h / 20) * (16 * s))}px` }}
+                        style={{ width: `${Math.max(1, Math.round(1.2 * s))}px`, height: `${Math.round((h / 20) * (14 * s))}px` }}
                       />
                     ))}
                   </div>
-                  <span className="font-mono text-slate-500 tracking-widest mt-0.5" style={{ fontSize: `${Math.round(6.5 * s)}px` }}>
+                  <span className="font-mono text-slate-500 tracking-widest mt-0.5 font-bold" style={{ fontSize: `${Math.round(6.5 * s)}px` }}>
                     MOEYS-ID
                   </span>
                 </div>
