@@ -199,43 +199,43 @@ export async function renderFrontCardToCanvas(
     let curY = cy + 2 * sRatio;
 
     // 1. Country Headers (Centered)
-    const fMoul1 = Math.round(12.5 * sRatio);
+    const fMoul1 = Math.round(11.5 * sRatio);
     ctx.font = `normal ${fMoul1}px ${FONT_MOUL}`;
     ctx.fillText(template.countryHeaderKm1, cx + cw / 2, curY);
 
-    curY += fMoul1 + 3 * sRatio;
-    const fMoul2 = Math.round(11 * sRatio);
+    curY += fMoul1 + 2 * sRatio;
+    const fMoul2 = Math.round(10 * sRatio);
     ctx.font = `normal ${fMoul2}px ${FONT_MOUL}`;
     ctx.fillText(template.countryHeaderKm2, cx + cw / 2, curY);
 
-    // 2. Royal Flourish: ផ្នែកខាងក្រោមព្រះរាជា
-    curY += fMoul2 + 3 * sRatio;
-    const flourishW = 155 * sRatio;
-    const flourishH = 17 * sRatio;
+    // 2. Royal Flourish: ផ្នែកខាងក្រោមព្រះរាជា (Optimized height to guarantee footer never overflows)
+    curY += fMoul2 + 2 * sRatio;
+    const flourishW = 125 * sRatio;
+    const flourishH = 10 * sRatio;
     try {
       const flImg = await loadImage(resolveFlourishUrl(template.flourishUrl));
       ctx.drawImage(flImg, cx + (cw - flourishW) / 2, curY, flourishW, flourishH);
     } catch (e) {
       // Fallback flourish divider
-      const halfW = 40 * sRatio;
+      const halfW = 35 * sRatio;
       ctx.save();
       ctx.strokeStyle = blue;
       ctx.lineWidth = 1 * sRatio;
       ctx.beginPath();
-      ctx.moveTo(cx + cw / 2 - halfW, curY + 8 * sRatio);
-      ctx.lineTo(cx + cw / 2 - 10 * sRatio, curY + 8 * sRatio);
+      ctx.moveTo(cx + cw / 2 - halfW, curY + 5 * sRatio);
+      ctx.lineTo(cx + cw / 2 - 8 * sRatio, curY + 5 * sRatio);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(cx + cw / 2 + 10 * sRatio, curY + 8 * sRatio);
-      ctx.lineTo(cx + cw / 2 + halfW, curY + 8 * sRatio);
+      ctx.moveTo(cx + cw / 2 + 8 * sRatio, curY + 5 * sRatio);
+      ctx.lineTo(cx + cw / 2 + halfW, curY + 5 * sRatio);
       ctx.stroke();
       ctx.restore();
     }
-    curY += flourishH + 3 * sRatio;
+    curY += flourishH + 2 * sRatio;
 
-    // 3. Ministry Department & School Name (Logo vertically centered & level with the two lines)
-    const logoH = 26 * sRatio;
-    const logoW = Math.round(logoH * 0.77); // ~20 * sRatio
+    // 3. Ministry Department & School Name (Emblem vertically centered with text)
+    const logoH = 22 * sRatio;
+    const logoW = Math.round(logoH * 0.77); // ~17 * sRatio
     const logoY = curY;
     try {
       const emblemImg = await loadImage(
@@ -246,18 +246,18 @@ export async function renderFrontCardToCanvas(
       ctx.drawImage(emblemImg, cx, logoY, logoW, logoH);
     } catch (e) {}
 
-    const deptX = cx + logoW + 5 * sRatio;
+    const deptX = cx + logoW + 4 * sRatio;
     ctx.textAlign = 'left';
-    const fDept = Math.round(10.5 * sRatio);
+    const fDept = Math.round(9.5 * sRatio);
     ctx.font = `bold ${fDept}px ${FONT_BATTAMBANG}`;
     ctx.fillText(template.ministryDepartment, deptX, curY + 1 * sRatio);
 
-    const ySchool = curY + 14 * sRatio;
-    const fSchool = Math.round(9.5 * sRatio);
+    const ySchool = curY + 12 * sRatio;
+    const fSchool = Math.round(9 * sRatio);
     ctx.font = `bold ${fSchool}px ${FONT_BATTAMBANG}`;
     ctx.fillText('អនុ/វិទ្យាល័យ', deptX, ySchool);
     const schoolLabelW = ctx.measureText('អនុ/វិទ្យាល័យ').width;
-    const schoolLineX1 = deptX + schoolLabelW + 4 * sRatio;
+    const schoolLineX1 = deptX + schoolLabelW + 3 * sRatio;
     const schoolLineX2 = cx + cw;
 
     const displaySchoolName = template.schoolNameOnly
@@ -266,10 +266,10 @@ export async function renderFrontCardToCanvas(
 
     if (displaySchoolName) {
       // NO DOTS when filled! BOLD font with auto-scaling to prevent border cut-off
-      let sFont = 10.5;
+      let sFont = 9.5;
       ctx.font = `bold ${Math.round(sFont * sRatio)}px ${FONT_BATTAMBANG}`;
       const maxSchoolW = (cx + cw - 2 * sRatio) - schoolLineX1;
-      while (ctx.measureText(displaySchoolName).width > maxSchoolW && sFont > 7.5) {
+      while (ctx.measureText(displaySchoolName).width > maxSchoolW && sFont > 7.0) {
         sFont -= 0.5;
         ctx.font = `bold ${Math.round(sFont * sRatio)}px ${FONT_BATTAMBANG}`;
       }
@@ -278,11 +278,11 @@ export async function renderFrontCardToCanvas(
       drawDottedLine(ctx, schoolLineX1, ySchool + fSchool, schoolLineX2 - 2 * sRatio, blue, 1 * sRatio);
     }
 
-    // 4. Photo Box on Left: exact 84 x 112 in 242-base (3:4 ratio, ~34.7% card width, matches original card)
-    const photoW = Math.round(84 * sRatio);
-    const photoH = Math.round(112 * sRatio);
+    // 4. Photo Box on Left: exact 76 x 101 in 242-base (Strict 3:4 ratio, optimal height for 9-on-A4)
+    const photoW = Math.round(76 * sRatio);
+    const photoH = Math.round(101 * sRatio);
     const photoX = cx;
-    const photoY = curY + logoH + 4 * sRatio;
+    const photoY = curY + logoH + 3 * sRatio;
 
     ctx.strokeStyle = blue;
     ctx.lineWidth = 1.2 * sRatio;
@@ -457,22 +457,22 @@ export async function renderFrontCardToCanvas(
       drawDottedLine(ctx, idX1, rowCurY + fField, cx + cw - 2 * sRatio, blue, 1 * sRatio);
     }
 
-    // 6. 5 Full Width Lines below Photo Box
-    let fullY = photoY + photoH + 7 * sRatio;
-    const lineGap = 16.5 * sRatio;
+    // 6. 5 Full Width Lines below Photo Box (Optimized gap to guarantee footer never overflows)
+    let fullY = photoY + photoH + 5 * sRatio;
+    const lineGap = 14 * sRatio;
 
     const drawFullLine = (
       label: string,
       value: string | undefined,
       isBoldVal = false,
       isArabicFont = false,
-      boldFontSize = 10.5
+      boldFontSize = 10
     ) => {
       ctx.textAlign = 'left';
       ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
       ctx.fillText(label, cx, fullY);
       const lw = ctx.measureText(label).width;
-      const lx1 = cx + lw + 4 * sRatio;
+      const lx1 = cx + lw + 3 * sRatio;
       const lx2 = cx + cw - 2 * sRatio;
 
       if (value) {
@@ -493,23 +493,23 @@ export async function renderFrontCardToCanvas(
 
     // 1. ថ្ងៃខែឆ្នាំកំណើតៈ (Arabic Numerals & Bold)
     const dobVal = student?.dateOfBirth ? toArabicNumerals(student.dateOfBirth) : '';
-    drawFullLine('ថ្ងៃខែឆ្នាំកំណើតៈ', dobVal, true, true, 11);
+    drawFullLine('ថ្ងៃខែឆ្នាំកំណើតៈ', dobVal, true, true, 10.5);
 
     // 2. ទីកន្លែងកំណើតៈ
-    drawFullLine('ទីកន្លែងកំណើតៈ', student?.placeOfBirth, true, false, 10);
+    drawFullLine('ទីកន្លែងកំណើតៈ', student?.placeOfBirth, true, false, 9.5);
 
     // 3. ឪពុកឈ្មោះៈ & មុខរបរ (aligned with auto-scaling to prevent overflow)
-    const jobColX = cx + Math.max(cw * 0.50, 120 * sRatio);
+    const jobColX = cx + Math.max(cw * 0.50, 118 * sRatio);
 
     ctx.textAlign = 'left';
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ឪពុកឈ្មោះៈ', cx, fullY);
     const fLabelW = ctx.measureText('ឪពុកឈ្មោះៈ').width;
-    const fL1 = cx + fLabelW + 4 * sRatio;
-    const maxFatherW = (jobColX - 6 * sRatio) - (fL1 + 2 * sRatio);
+    const fL1 = cx + fLabelW + 3 * sRatio;
+    const maxFatherW = (jobColX - 5 * sRatio) - (fL1 + 2 * sRatio);
 
     if (student?.fatherName) {
-      let fFontSize = 10.5;
+      let fFontSize = 9.5;
       ctx.font = `bold ${Math.round(fFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
       while (ctx.measureText(student.fatherName).width > maxFatherW && fFontSize > 6.5) {
         fFontSize -= 0.5;
@@ -517,17 +517,17 @@ export async function renderFrontCardToCanvas(
       }
       ctx.fillText(student.fatherName, fL1 + 2 * sRatio, fullY);
     } else {
-      drawDottedLine(ctx, fL1, fullY + fField, jobColX - 6 * sRatio, blue, 1 * sRatio);
+      drawDottedLine(ctx, fL1, fullY + fField, jobColX - 5 * sRatio, blue, 1 * sRatio);
     }
 
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('មុខរបរ', jobColX, fullY);
     const j1LabelW = ctx.measureText('មុខរបរ').width;
-    const j1L1 = jobColX + j1LabelW + 4 * sRatio;
+    const j1L1 = jobColX + j1LabelW + 3 * sRatio;
     const maxJob1W = (cx + cw - 2 * sRatio) - (j1L1 + 2 * sRatio);
 
     if (student?.fatherOccupation) {
-      let j1FontSize = 10.5;
+      let j1FontSize = 9.5;
       ctx.font = `bold ${Math.round(j1FontSize * sRatio)}px ${FONT_BATTAMBANG}`;
       while (ctx.measureText(student.fatherOccupation).width > maxJob1W && j1FontSize > 6.5) {
         j1FontSize -= 0.5;
@@ -543,11 +543,11 @@ export async function renderFrontCardToCanvas(
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('ម្តាយឈ្មោះៈ', cx, fullY);
     const mLabelW = ctx.measureText('ម្តាយឈ្មោះៈ').width;
-    const mL1 = cx + mLabelW + 4 * sRatio;
-    const maxMotherW = (jobColX - 6 * sRatio) - (mL1 + 2 * sRatio);
+    const mL1 = cx + mLabelW + 3 * sRatio;
+    const maxMotherW = (jobColX - 5 * sRatio) - (mL1 + 2 * sRatio);
 
     if (student?.motherName) {
-      let mFontSize = 10.5;
+      let mFontSize = 9.5;
       ctx.font = `bold ${Math.round(mFontSize * sRatio)}px ${FONT_BATTAMBANG}`;
       while (ctx.measureText(student.motherName).width > maxMotherW && mFontSize > 6.5) {
         mFontSize -= 0.5;
@@ -555,17 +555,17 @@ export async function renderFrontCardToCanvas(
       }
       ctx.fillText(student.motherName, mL1 + 2 * sRatio, fullY);
     } else {
-      drawDottedLine(ctx, mL1, fullY + fField, jobColX - 6 * sRatio, blue, 1 * sRatio);
+      drawDottedLine(ctx, mL1, fullY + fField, jobColX - 5 * sRatio, blue, 1 * sRatio);
     }
 
     ctx.font = `normal ${fField}px ${FONT_BATTAMBANG}`;
     ctx.fillText('មុខរបរ', jobColX, fullY);
     const j2LabelW = ctx.measureText('មុខរបរ').width;
-    const j2L1 = jobColX + j2LabelW + 4 * sRatio;
+    const j2L1 = jobColX + j2LabelW + 3 * sRatio;
     const maxJob2W = (cx + cw - 2 * sRatio) - (j2L1 + 2 * sRatio);
 
     if (student?.motherOccupation) {
-      let j2FontSize = 10.5;
+      let j2FontSize = 9.5;
       ctx.font = `bold ${Math.round(j2FontSize * sRatio)}px ${FONT_BATTAMBANG}`;
       while (ctx.measureText(student.motherOccupation).width > maxJob2W && j2FontSize > 6.5) {
         j2FontSize -= 0.5;
@@ -578,51 +578,55 @@ export async function renderFrontCardToCanvas(
     fullY += lineGap;
 
     // 5. ទីលំនៅបច្ចុប្បន្នៈ
-    drawFullLine('ទីលំនៅបច្ចុប្បន្នៈ', student?.address, true, false, 10);
+    drawFullLine('ទីលំនៅបច្ចុប្បន្នៈ', student?.address, true, false, 9.5);
 
-    // 7. FOOTER SIGNATURES & NAMES AREA (Matches original physical card, anchored to bottom)
-    const footerH = 58 * sRatio;
-    const targetFooterY = by + bh - innerPad - footerH;
-    const yDate = Math.max(fullY + 6 * sRatio, targetFooterY);
-    const fFooter = Math.round(9 * sRatio);
+    // 7. FOOTER SIGNATURES & NAMES AREA
+    // Strictly anchored with safe bottom buffer and descender room so Director Name (ឈ្មោះនាយក) is NEVER cut off!
+    const footerH = 48 * sRatio;
+    const innerBottom = by + bh - innerPad;
+    // Generous clamp so director name with Khmer sub-scripts (ជើងអក្សរ & ស្រៈក្រោម) has ample breathing room above inner border
+    const maxAllowedYDate = innerBottom - 46 * sRatio;
+    const targetFooterY = innerBottom - footerH;
+    const yDate = Math.min(Math.max(fullY + 3 * sRatio, targetFooterY), maxAllowedYDate);
+    const fFooter = Math.round(8.5 * sRatio);
 
-    // Left: Director Signature Block (កន្លែងសរសេរ & ឈ្មោះនាយកពីក្រោម)
-    const dirCenterX = cx + 62 * sRatio;
+    // Left: Director Signature Block (កាលបរិច្ឆេទ, តួនាទី, កន្លែងចុះហត្ថលេខា/ត្រា, ឈ្មោះនាយក)
+    const dirCenterX = cx + 60 * sRatio;
     ctx.textAlign = 'center';
     ctx.font = `normal ${fFooter}px ${FONT_BATTAMBANG}`;
     ctx.fillText(template.issueDateLine, dirCenterX, yDate);
 
-    ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(template.directorTitle, dirCenterX, yDate + 13 * sRatio);
+    ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(template.directorTitle, dirCenterX, yDate + 10.5 * sRatio);
 
     // Dedicated signing line
     drawDottedLine(
       ctx,
-      dirCenterX - 42 * sRatio,
-      yDate + 36 * sRatio,
-      dirCenterX + 42 * sRatio,
+      dirCenterX - 38 * sRatio,
+      yDate + 22 * sRatio,
+      dirCenterX + 38 * sRatio,
       blue,
       0.8 * sRatio,
       2,
       4
     );
 
-    // Director name underneath
+    // Director name underneath (strictly bounded with >5.5 base units descender safety margin)
     const dirName = template.directorName || 'ជា សារ៉ា';
-    ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(dirName, dirCenterX, yDate + 47 * sRatio);
+    ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(dirName, dirCenterX, yDate + 30.5 * sRatio);
 
     // Right: Student Signature Block (កន្លែងសរសេរ & ឈ្មោះសិស្សពីក្រោម)
-    const stuCenterX = cx + cw - 58 * sRatio;
-    ctx.font = `medium ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(template.signatureTitle, stuCenterX, yDate + 13 * sRatio);
+    const stuCenterX = cx + cw - 56 * sRatio;
+    ctx.font = `medium ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(template.signatureTitle, stuCenterX, yDate + 10.5 * sRatio);
 
     // Dedicated signing line
     drawDottedLine(
       ctx,
-      stuCenterX - 38 * sRatio,
-      yDate + 36 * sRatio,
-      stuCenterX + 38 * sRatio,
+      stuCenterX - 36 * sRatio,
+      yDate + 22 * sRatio,
+      stuCenterX + 36 * sRatio,
       blue,
       0.8 * sRatio,
       2,
@@ -631,8 +635,8 @@ export async function renderFrontCardToCanvas(
 
     // Student name underneath
     const stuName = student?.nameKm || '........................';
-    ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
-    ctx.fillText(stuName, stuCenterX, yDate + 47 * sRatio);
+    ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
+    ctx.fillText(stuName, stuCenterX, yDate + 30.5 * sRatio);
   }
 
   // ========================================================

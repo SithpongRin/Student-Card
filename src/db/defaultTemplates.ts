@@ -3,6 +3,7 @@ import { MOEYS_EMBLEM_DATA_URI, DEFAULT_FLOURISH_DATA_URI } from '../utils/asset
 
 export const TEMPLATE_1_ID = 'template-reference-moeys-default';
 export const TEMPLATE_2_ID = 'template-battambang-bottom-photo';
+export const TEMPLATE_3_ID = 'template-modern-green-watpranom';
 
 export const DEFAULT_STUDENT_CARD_RULES: string[] = [
   '១. កាតនេះជាឯកសារផ្លូវការសម្រាប់សម្គាល់ខ្លួនសិស្សក្នុងគ្រឹះស្ថានសិក្សា។',
@@ -116,7 +117,60 @@ export const templateBattambangBottomPhoto: CardTemplate = {
   updatedAt: Date.now(),
 };
 
+// TEMPLATE 3: Modern School ID Card (Green Header / 9-on-A4 Compact Style)
+export const templateModernGreenWatPranom: CardTemplate = {
+  id: TEMPLATE_3_ID,
+  name: 'គំរូទី៣ — ប័ណ្ណសម្គាល់ខ្លួនសិស្ស ទំនើបបៃតង (វិទ្យាល័យវត្តប្រណម្យ)',
+  variant: 'top-photo',
+  isDefault: false,
+  isReference: false,
+
+  cardWidthMm: 60,
+  cardHeightMm: 90,
+
+  countryHeaderKm1: 'ព្រះរាជាណាចក្រកម្ពុជា',
+  countryHeaderKm2: 'ជាតិ សាសនា ព្រះមហាក្សត្រ',
+  ministryDepartment: 'មន្ទីរអប់រំ យុវជន និងកីឡាខេត្តកណ្តាល',
+  schoolTypeAndName: 'វិទ្យាល័យវត្តប្រណម្យ',
+  schoolNameOnly: 'វិទ្យាល័យវត្តប្រណម្យ',
+
+  cardTitleKm: 'ប័ណ្ណសម្គាល់ខ្លួនសិស្ស',
+  cardNumberPrefix: 'លេខ៖',
+  academicYearPrefix: 'ឆ្នាំសិក្សា៖ ២០២៤-២០២៥',
+
+  photoBoxWidthMm: 28,
+  photoBoxHeightMm: 38,
+  photoBoxText: '3 x 4',
+  photoBoxPosition: 'top-left',
+
+  issueDateLine: 'ផុតកំណត់៖ ០១ វិច្ឆិកា ២០២៥',
+  directorTitle: 'នាយកសាលា',
+  directorName: 'ជា សារ៉ា',
+  signatureTitle: 'ហត្ថលេខាសាមីខ្លួន',
+  studentDeclaration: 'ជាសិស្ស វិទ្យាល័យវត្តប្រណម្យ',
+
+  primaryColor: '#007A3D', // Modern school vibrant emerald green
+  lineColor: '#007A3D',
+  fontHeading: 'Moul',
+  fontBody: 'Battambang',
+  watermarkOpacity: 0.15,
+  showWatermark: true,
+  showBackEmblem: true,
+  backEmblemSizePercent: 52,
+  backLayout: 'rules-and-emblem',
+  backSchoolPhone: '098 211 186 / 015 653 053',
+  backRulesText: DEFAULT_STUDENT_CARD_RULES,
+  showBackBarcodeOrQr: true,
+  borderWidthMm: 0.6,
+  innerPaddingMm: 2.8,
+
+  emblemUrl: MOEYS_EMBLEM_DATA_URI,
+  flourishUrl: DEFAULT_FLOURISH_DATA_URI,
+  updatedAt: Date.now(),
+};
+
 export const PREDEFINED_TEMPLATES: CardTemplate[] = [
   defaultReferenceTemplate,
   templateBattambangBottomPhoto,
+  templateModernGreenWatPranom,
 ];

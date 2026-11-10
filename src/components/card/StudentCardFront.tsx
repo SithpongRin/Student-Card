@@ -384,15 +384,15 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
 
                 {/* Flourish: ផ្នែកខាងក្រោមព្រះរាជា */}
                 <div
-                  className="flex items-center justify-center my-[2px]"
-                  style={{ height: `${Math.round(17 * s)}px` }}
+                  className="flex items-center justify-center my-[1px]"
+                  style={{ height: `${Math.round(10 * s)}px` }}
                 >
                   <img
                     src={flourishSource}
                     alt=""
                     style={{
-                      width: `${Math.round(155 * s)}px`,
-                      height: `${Math.round(17 * s)}px`,
+                      width: `${Math.round(125 * s)}px`,
+                      height: `${Math.round(10 * s)}px`,
                     }}
                     className="object-contain opacity-95"
                     onError={(e) => {
@@ -402,13 +402,13 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 </div>
 
                 {/* Ministry & School (Logo centered & level with the two lines) */}
-                <div className="flex items-center gap-1.5 mt-[2px] text-left">
+                <div className="flex items-center gap-1 mt-[1px] text-left">
                   <img
                     src={emblemSource}
                     alt="MoEYS Emblem"
                     style={{
-                      width: `${Math.round(20 * s)}px`,
-                      height: `${Math.round(27 * s)}px`,
+                      width: `${Math.round(18 * s)}px`,
+                      height: `${Math.round(23 * s)}px`,
                     }}
                     className="object-contain shrink-0"
                   />
@@ -416,8 +416,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     <div
                       style={{
                         color: blueColor,
-                        fontSize: `${Math.round(10.5 * s)}px`,
-                        lineHeight: `${Math.round(15 * s)}px`,
+                        fontSize: `${Math.round(9.5 * s)}px`,
+                        lineHeight: `${Math.round(13 * s)}px`,
                       }}
                       className="font-battambang font-bold tracking-tight truncate"
                     >
@@ -426,8 +426,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     <div
                       style={{
                         color: blueColor,
-                        fontSize: `${Math.round(9.5 * s)}px`,
-                        lineHeight: `${Math.round(14 * s)}px`,
+                        fontSize: `${Math.round(9 * s)}px`,
+                        lineHeight: `${Math.round(13 * s)}px`,
                       }}
                       className="font-battambang tracking-tight flex items-baseline gap-1 mt-[1px]"
                     >
@@ -435,7 +435,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                       {displaySchoolName ? (
                         <span
                           className="font-bold truncate"
-                          style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                          style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                         >
                           {displaySchoolName}
                         </span>
@@ -457,8 +457,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   style={{
                     borderColor: blueColor,
                     borderWidth: `${Math.max(1, 1.2 * s)}px`,
-                    width: `${Math.round(84 * s)}px`,
-                    height: `${Math.round(112 * s)}px`, // 84:112 = 3:4
+                    width: `${Math.round(76 * s)}px`,
+                    height: `${Math.round(101 * s)}px`, // 76:101 ≈ 3:4
                   }}
                   className="border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
                 >
@@ -470,7 +470,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     />
                   ) : (
                     <div
-                      style={{ color: blueColor, fontSize: `${Math.round(13 * s)}px` }}
+                      style={{ color: blueColor, fontSize: `${Math.round(12 * s)}px` }}
                       className="font-bold font-sans tracking-wider opacity-70"
                     >
                       {template.photoBoxText || '3 x 4'}
@@ -609,10 +609,10 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
               <div
                 style={{
                   color: blueColor,
-                  fontSize: `${Math.round(9.5 * s)}px`,
-                  lineHeight: `${Math.round(15 * s)}px`,
-                  gap: `${Math.round(6 * s)}px`,
-                  marginTop: `${Math.round(6 * s)}px`,
+                  fontSize: `${Math.round(9 * s)}px`,
+                  lineHeight: `${Math.round(14 * s)}px`,
+                  gap: `${Math.round(3.5 * s)}px`,
+                  marginTop: `${Math.round(3 * s)}px`,
                 }}
                 className="flex flex-col"
               >
@@ -621,7 +621,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   {dob ? (
                     <span
                       className="font-bold font-sans pl-1 truncate"
-                      style={{ fontSize: `${Math.round(11 * s)}px` }}
+                      style={{ fontSize: `${Math.round(10.5 * s)}px` }}
                     >
                       {dob}
                     </span>
@@ -634,7 +634,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   {pob ? (
                     <span
                       className="font-semibold pl-1 truncate"
-                      style={{ fontSize: `${Math.round(10 * s)}px` }}
+                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                     >
                       {pob}
                     </span>
@@ -646,13 +646,13 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 <div className="flex items-baseline">
                   <div
                     className="flex items-baseline shrink-0"
-                    style={{ width: `${Math.round(150 * s)}px` }}
+                    style={{ width: `${Math.round(145 * s)}px` }}
                   >
                     <span className="shrink-0 font-medium">ឪពុកឈ្មោះៈ</span>
                     {fatherName ? (
                       <span
                         className="font-bold pl-1 truncate"
-                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                       >
                         {fatherName}
                       </span>
@@ -665,7 +665,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     {fatherJob ? (
                       <span
                         className="font-bold pl-1 truncate"
-                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                       >
                         {fatherJob}
                       </span>
@@ -678,13 +678,13 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 <div className="flex items-baseline">
                   <div
                     className="flex items-baseline shrink-0"
-                    style={{ width: `${Math.round(150 * s)}px` }}
+                    style={{ width: `${Math.round(145 * s)}px` }}
                   >
                     <span className="shrink-0 font-medium">ម្តាយឈ្មោះៈ</span>
                     {motherName ? (
                       <span
                         className="font-bold pl-1 truncate"
-                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                       >
                         {motherName}
                       </span>
@@ -697,7 +697,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     {motherJob ? (
                       <span
                         className="font-bold pl-1 truncate"
-                        style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                        style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                       >
                         {motherJob}
                       </span>
@@ -711,7 +711,7 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   {address ? (
                     <span
                       className="font-semibold pl-1 truncate"
-                      style={{ fontSize: `${Math.round(10 * s)}px` }}
+                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                     >
                       {address}
                     </span>
@@ -721,13 +721,13 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                 </div>
               </div>
 
-              {/* 4. FOOTER SIGNATURES & NAME AREA (Always anchored at bottom) */}
+              {/* 4. FOOTER SIGNATURES & NAME AREA (Always anchored at bottom with plenty buffer) */}
               <div
                 style={{
                   color: blueColor,
-                  fontSize: `${Math.round(9 * s)}px`,
+                  fontSize: `${Math.round(8.5 * s)}px`,
                   marginTop: 'auto',
-                  paddingTop: `${Math.round(6 * s)}px`,
+                  paddingTop: `${Math.round(3 * s)}px`,
                 }}
                 className="leading-tight flex flex-col justify-end"
               >
@@ -740,24 +740,24 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     <div>{template.issueDateLine}</div>
                     <div
                       className="font-battambang font-bold mt-[2px]"
-                      style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                     >
                       {template.directorTitle}
                     </div>
                     {/* Dedicated writing & stamping space */}
                     <div
                       className="w-full flex items-center justify-center"
-                      style={{ height: `${Math.round(32 * s)}px` }}
+                      style={{ height: `${Math.round(18 * s)}px` }}
                     >
                       <div
                         className="border-b border-dotted border-current opacity-30"
-                        style={{ width: `${Math.round(90 * s)}px` }}
+                        style={{ width: `${Math.round(85 * s)}px` }}
                       />
                     </div>
                     {/* Name underneath */}
                     <div
                       className="font-battambang font-bold tracking-wide text-center"
-                      style={{ fontSize: `${Math.round(10.5 * s)}px` }}
+                      style={{ fontSize: `${Math.round(10 * s)}px` }}
                     >
                       {template.directorName || 'ជា សារ៉ា'}
                     </div>
@@ -768,34 +768,31 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     className="text-center flex flex-col items-center"
                     style={{
                       width: `${Math.round(125 * s)}px`,
-                      paddingTop: `${Math.round(14 * s)}px`,
+                      paddingTop: `${Math.round(10 * s)}px`,
                     }}
                   >
                     <div
                       className="font-battambang font-medium"
-                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
+                      style={{ fontSize: `${Math.round(9 * s)}px` }}
                     >
                       {template.signatureTitle}
                     </div>
                     {/* Dedicated student writing/signing space */}
                     <div
                       className="w-full flex items-center justify-center"
-                      style={{ height: `${Math.round(32 * s)}px` }}
+                      style={{ height: `${Math.round(18 * s)}px` }}
                     >
                       <div
-                        className="border-b border-dotted border-current opacity-40"
-                        style={{ width: `${Math.round(90 * s)}px` }}
+                        className="border-b border-dotted border-current opacity-30"
+                        style={{ width: `${Math.round(75 * s)}px` }}
                       />
                     </div>
                     {/* Name underneath */}
                     <div
-                      className="font-battambang font-bold truncate text-center"
-                      style={{
-                        fontSize: `${Math.round(10 * s)}px`,
-                        maxWidth: `${Math.round(115 * s)}px`,
-                      }}
+                      className="font-battambang font-bold tracking-wide text-center truncate max-w-[120px]"
+                      style={{ fontSize: `${Math.round(9.5 * s)}px` }}
                     >
-                      {nameKm || <span className="opacity-60 font-normal">........................</span>}
+                      {nameKm || '........................'}
                     </div>
                   </div>
                 </div>

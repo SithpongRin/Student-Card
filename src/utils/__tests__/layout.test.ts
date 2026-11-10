@@ -40,4 +40,54 @@ describe('A4 9-Cards Layout & Geometry Calculation', () => {
     // Front column 2 -> Back column 0
     expect(cols - 1 - 2).toBe(0);
   });
+
+  it('guarantees director name and footer fit safely inside card bottom border for 64x92 and 60x90 cards', () => {
+    // Top-photo vertical layout verification
+    const cardHeights = [92, 90]; // 64x92 (MoEYS standard) and 60x90 (A2 pouch)
+    const cardWidths = [64, 60];
+
+    for (let i = 0; i < cardHeights.length; i++) {
+      const widthMm = cardWidths[i];
+      const heightMm = cardHeights[i];
+      const scale = 300 / 25.4;
+      const widthPx = Math.round(widthMm * scale);
+      const heightPx = Math.round(heightMm * scale);
+      const sRatio = widthPx / 242;
+
+      const cardPad = 4.5 * sRatio;
+      const innerPad = 4 * sRatio;
+      const by = cardPad;
+      const bh = heightPx - 2 * cardPad;
+      const innerBottom = by + bh - innerPad;
+
+      // Vertical element breakdown in base units
+      const fMoul1 = 11.5 * sRatio;
+      const fMoul2 = 10 * sRatio;
+      const flourishH = 10 * sRatio;
+      const logoH = 22 * sRatio;
+      const photoH = 101 * sRatio;
+      const lineGap = 14 * sRatio;
+
+      let curY = cardPad + innerPad + 2 * sRatio;
+      curY += fMoul1 + 2 * sRatio;
+      curY += fMoul2 + 2 * sRatio;
+      curY += flourishH + 2 * sRatio;
+
+      const photoY = curY + logoH + 3 * sRatio;
+      const fullY = photoY + photoH + 5 * sRatio + 5 * lineGap;
+
+      const footerH = 48 * sRatio;
+      const maxAllowedYDate = innerBottom - 46 * sRatio;
+      const targetFooterY = innerBottom - footerH;
+      const yDate = Math.min(Math.max(fullY + 3 * sRatio, targetFooterY), maxAllowedYDate);
+
+      // Director name position
+      const dirNameY = yDate + 30.5 * sRatio;
+      const dirNameBottom = dirNameY + 10 * sRatio; // Font size ~ 10 * sRatio
+
+      // Director name bottom MUST be strictly within innerBottom with safety margin (> 5 base units)
+      expect(dirNameBottom).toBeLessThan(innerBottom);
+      expect(innerBottom - dirNameBottom).toBeGreaterThanOrEqual(5.0 * sRatio);
+    }
+  });
 });

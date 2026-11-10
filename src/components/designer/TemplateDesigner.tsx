@@ -102,9 +102,9 @@ export const TemplateDesigner: React.FC = () => {
         <h3 className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
           ជ្រើសរើសគំរូកាត (Select Card Template):
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {PREDEFINED_TEMPLATES.map((tpl) => {
-            const isSelected = currentTemplate.id === tpl.id || currentTemplate.variant === tpl.variant;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {PREDEFINED_TEMPLATES.map((tpl, idx) => {
+            const isSelected = currentTemplate.id === tpl.id;
             return (
               <div
                 key={tpl.id}
@@ -115,30 +115,30 @@ export const TemplateDesigner: React.FC = () => {
                     : 'border-black/[0.06] bg-white hover:border-black/20'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                       isSelected ? 'bg-[#0071e3] text-white' : 'bg-[#f5f5f7] text-[#1d1d1f]'
                     }`}
                   >
-                    {tpl.variant === 'top-photo' ? 'T1' : 'T2'}
+                    T{idx + 1}
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-[#1d1d1f] font-battambang">
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#1d1d1f] font-battambang truncate">
                       {tpl.name}
                     </div>
-                    <div className="text-[11px] text-[#86868b] mt-0.5">
+                    <div className="text-[11px] text-[#86868b] mt-0.5 truncate">
                       {tpl.variant === 'top-photo'
-                        ? 'រូបថត 3x4 ខាងលើ-ឆ្វេង | ចំណងជើង អត្តសញ្ញាណប័ណ្ណសិស្ស'
-                        : 'រូបថត 3x4 ខាងក្រោម-ឆ្វេង | ចំណងជើង ប័ណ្ណសម្គាល់ខ្លួនសិស្ស'}
+                        ? `${tpl.cardWidthMm}×${tpl.cardHeightMm}mm | ${tpl.cardTitleKm}`
+                        : 'រូបថតខាងក្រោម | ប័ណ្ណសម្គាល់ខ្លួនសិស្ស'}
                     </div>
                   </div>
                 </div>
 
                 {isSelected ? (
-                  <CheckCircle2 size={20} className="text-[#0071e3]" />
+                  <CheckCircle2 size={20} className="text-[#0071e3] shrink-0" />
                 ) : (
-                  <span className="text-xs text-[#86868b] hover:text-[#0071e3]">ជ្រើសរើស</span>
+                  <span className="text-xs text-[#86868b] hover:text-[#0071e3] shrink-0">ជ្រើសរើស</span>
                 )}
               </div>
             );
