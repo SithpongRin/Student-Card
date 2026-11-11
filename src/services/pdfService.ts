@@ -3,7 +3,7 @@ import { Student } from '../types/student';
 import { CardTemplate } from '../types/template';
 import { PrintSettings, PrintMode } from '../types/print';
 import { renderFrontCardToCanvas, renderBackCardToCanvas } from './CardCanvasRenderer';
-import { calculateA4GridLayout } from '../utils/cardSizes';
+import { computeSheetLayout } from '../utils/cardSizes';
 
 const MM_TO_PT = 72 / 25.4; // ~2.83465 pt/mm
 
@@ -78,8 +78,11 @@ function drawCuttingGuides(
   }
 }
 
+export { computeSheetLayout } from '../utils/cardSizes';
+export type { SheetLayout } from '../utils/cardSizes';
+
 /**
- * Generates Production-Ready A4 Print PDF with 9 cards per page
+ * Generates Production-Ready A4 Print PDF
  */
 export async function generateStudentCardsPdf(
   students: Student[],
@@ -89,56 +92,24 @@ export async function generateStudentCardsPdf(
   onProgress?: (p: PdfGenerationProgress) => void
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
+  const layout = computeSheetLayout(template, settings);
 
-  const paperWidthMm = settings.paperWidthMm || 210;
-  const paperHeightMm = settings.paperHeightMm || 297;
-  const paperWidthPt = paperWidthMm * MM_TO_PT; // ~595.28 pt (A4)
-  const paperHeightPt = paperHeightMm * MM_TO_PT; // ~841.89 pt (A4)
+  const paperWidthPt = layout.paperWidthMm * MM_TO_PT; // ~595.28 pt (A4)
+  const paperHeightPt = layout.paperHeightMm * MM_TO_PT; // ~841.89 pt (A4)
 
-  const cardWidthMm = settings.cardWidthMm || template.cardWidthMm || 64;
-  const cardHeightMm = settings.cardHeightMm || template.cardHeightMm || 92;
+  const cardWidthMm = layout.cardWidthMm;
+  const cardHeightMm = layout.cardHeightMm;
   const cardWidthPt = cardWidthMm * MM_TO_PT;
   const cardHeightPt = cardHeightMm * MM_TO_PT;
 
-  const defaultGrid = calculateA4GridLayout(
-    cardWidthMm,
-    cardHeightMm,
-    paperWidthMm,
-    paperHeightMm,
-    settings.cardsPerPage
-  );
-
-  // Guarantee grid respects sheet limits: cols and rows must fit on A4
-  const cols = defaultGrid.cols;
-  const rows = defaultGrid.rows;
-  const cardsPerPage = cols * rows;
-
-  // Clamp margins to guarantee Row 3 (or any row) never overflows off the bottom of the page
-  const maxSafeTopMm = Math.max(0, paperHeightMm - rows * cardHeightMm);
-  const maxSafeLeftMm = Math.max(0, paperWidthMm - cols * cardWidthMm);
-
-  const safeMarginTopMm =
-    settings.marginTopMm !== undefined &&
-    settings.marginTopMm >= 0 &&
-    settings.marginTopMm <= maxSafeTopMm
-      ? settings.marginTopMm
-      : defaultGrid.marginTopMm;
-
-  const safeMarginLeftMm =
-    settings.marginLeftMm !== undefined &&
-    settings.marginLeftMm >= 0 &&
-    settings.marginLeftMm <= maxSafeLeftMm
-      ? settings.marginLeftMm
-      : defaultGrid.marginLeftMm;
-
-  const marginTopPt = safeMarginTopMm * MM_TO_PT;
-  const marginLeftPt = safeMarginLeftMm * MM_TO_PT;
-
-  const duplexOffsetXPts = (settings.duplexOffsetXmM || 0) * MM_TO_PT;
-  const duplexOffsetYPts = (settings.duplexOffsetYmM || 0) * MM_TO_PT;
-
-  const guideLenPt = (settings.cuttingGuideLengthMm || 3.5) * MM_TO_PT;
+  const { cols, rows, cardsPerPage } = layout;
+  const marginTopPt = layout.marginTopMm * MM_TO_PT;
+  const marginLeftPt = layout.marginLeftMm * MM_TO_PT;
+  const duplexOffsetXPts = layout.duplexOffsetXmM * MM_TO_PT;
+  const duplexOffsetYPts = layout.duplexOffsetYmM * MM_TO_PT;
+  const guideLenPt = layout.cuttingGuideLengthMm * MM_TO_PT;
   const guideColor = rgb(0.65, 0.65, 0.7);
+
 
   // Pre-render back side canvas once (since all student cards share the institutional MoEYS back design)
   let backImageEmbed: any = null;

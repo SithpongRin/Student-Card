@@ -1,3 +1,6 @@
+import type { CardTemplate } from '../types/template';
+import type { PrintSettings } from '../types/print';
+
 export interface CardSizePreset {
   id: string;
   nameKm: string;
@@ -263,4 +266,76 @@ export function calculateA4GridLayout(
     paperWidthMm,
     paperHeightMm,
   };
+}
+
+export interface SheetLayout {
+  paperWidthMm: number;
+  paperHeightMm: number;
+  cardWidthMm: number;
+  cardHeightMm: number;
+  cols: number;
+  rows: number;
+  cardsPerPage: number;
+  marginTopMm: number;
+  marginLeftMm: number;
+  duplexOffsetXmM: number;
+  duplexOffsetYmM: number;
+  cuttingGuideLengthMm: number;
+}
+
+/**
+ * Single source of truth for where cards sit on the A4 sheet.
+ * Used by the PDF generator AND the on-screen A4 sheet preview, so they always match.
+ */
+export function computeSheetLayout(template: CardTemplate, settings: PrintSettings): SheetLayout {
+  const paperWidthMm = settings.paperWidthMm || 210;
+  const paperHeightMm = settings.paperHeightMm || 297;
+  const cardWidthMm = settings.cardWidthMm || template.cardWidthMm || 64;
+  const cardHeightMm = settings.cardHeightMm || template.cardHeightMm || 92;
+
+  const defaultGrid = calculateA4GridLayout(
+    cardWidthMm,
+    cardHeightMm,
+    paperWidthMm,
+    paperHeightMm,
+    settings.cardsPerPage
+  );
+  const cols = defaultGrid.cols;
+  const rows = defaultGrid.rows;
+
+  // Clamp margins so no row/column ever overflows off the page
+  const maxSafeTopMm = Math.max(0, paperHeightMm - rows * cardHeightMm);
+  const maxSafeLeftMm = Math.max(0, paperWidthMm - cols * cardWidthMm);
+  const marginTopMm =
+    settings.marginTopMm !== undefined && settings.marginTopMm >= 0 && settings.marginTopMm <= maxSafeTopMm
+      ? settings.marginTopMm
+      : defaultGrid.marginTopMm;
+  const marginLeftMm =
+    settings.marginLeftMm !== undefined && settings.marginLeftMm >= 0 && settings.marginLeftMm <= maxSafeLeftMm
+      ? settings.marginLeftMm
+      : defaultGrid.marginLeftMm;
+
+  return {
+    paperWidthMm,
+    paperHeightMm,
+    cardWidthMm,
+    cardHeightMm,
+    cols,
+    rows,
+    cardsPerPage: cols * rows,
+    marginTopMm,
+    marginLeftMm,
+    duplexOffsetXmM: settings.duplexOffsetXmM || 0,
+    duplexOffsetYmM: settings.duplexOffsetYmM || 0,
+    cuttingGuideLengthMm: settings.cuttingGuideLengthMm || 3.5,
+  };
+}
+
+/** Cards per A4 sheet for the current template + print settings (same as the PDF). */
+export function cardsPerSheet(template: CardTemplate, settings: PrintSettings): number {
+  return computeSheetLayout(template, {
+    ...settings,
+    cardWidthMm: template.cardWidthMm,
+    cardHeightMm: template.cardHeightMm,
+  }).cardsPerPage;
 }

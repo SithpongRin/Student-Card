@@ -1,5 +1,8 @@
 import React from 'react';
 import { useAppStore, ActiveView } from '../../store/useAppStore';
+import { useTemplateStore } from '../../store/useTemplateStore';
+import { cardsPerSheet } from '../../utils/cardSizes';
+import { toKhmerNumerals } from '../../utils/khmerNumerals';
 import {
   LayoutDashboard,
   Users,
@@ -26,6 +29,7 @@ interface NavItem {
 
 export const AppleSidebar: React.FC = () => {
   const { activeView, setActiveView, isMobileSidebarOpen, setIsMobileSidebarOpen } = useAppStore();
+  const perSheet = useTemplateStore((st) => cardsPerSheet(st.currentTemplate, st.printSettings));
 
   const navItems: NavItem[] = [
     {
@@ -63,7 +67,7 @@ export const AppleSidebar: React.FC = () => {
       labelKm: 'បោះពុម្ព A4 PDF',
       labelEn: 'PDF Export',
       icon: <Printer size={18} />,
-      badge: '៩ កាត',
+      badge: `${toKhmerNumerals(perSheet)} កាត`,
     },
     {
       id: 'backup',

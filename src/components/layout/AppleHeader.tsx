@@ -3,6 +3,9 @@ import { useAppStore, ActiveView } from '../../store/useAppStore';
 import { AppleButton } from '../common/AppleButton';
 import { AppleBadge } from '../common/AppleBadge';
 import { Printer, Upload, RefreshCw, Menu } from 'lucide-react';
+import { useTemplateStore } from '../../store/useTemplateStore';
+import { cardsPerSheet } from '../../utils/cardSizes';
+import { toKhmerNumerals } from '../../utils/khmerNumerals';
 
 interface AppleHeaderProps {
   onRefresh?: () => void;
@@ -21,6 +24,7 @@ const VIEW_TITLES: Record<ActiveView, { km: string; en: string }> = {
 
 export const AppleHeader: React.FC<AppleHeaderProps> = ({ onRefresh }) => {
   const { activeView, setActiveView, toggleMobileSidebar } = useAppStore();
+  const perSheet = useTemplateStore((st) => cardsPerSheet(st.currentTemplate, st.printSettings));
   const title = VIEW_TITLES[activeView] || { km: 'Card សិស្ស', en: '' };
 
   return (
@@ -54,10 +58,10 @@ export const AppleHeader: React.FC<AppleHeaderProps> = ({ onRefresh }) => {
           <span className="font-semibold text-[#0071e3]">Sithpong Rin</span>
         </div>
 
-        {/* 9 Cards Badge (hidden on small phone screens) */}
+        {/* Cards-per-sheet Badge (hidden on small phone screens) */}
         <div className="hidden sm:inline-flex">
           <AppleBadge variant="green" size="sm">
-            A4: ៩ កាត
+            A4: {toKhmerNumerals(perSheet)} កាត
           </AppleBadge>
         </div>
 

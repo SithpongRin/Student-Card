@@ -18,8 +18,10 @@ import {
 import {
   generateStudentCardsPdf,
   downloadPdf,
+  computeSheetLayout,
   PdfGenerationProgress,
 } from '../../services/pdfService';
+import { initialSeedStudents } from '../../db/seedData';
 import { PrintMode } from '../../types/print';
 import { CARD_SIZE_PRESETS } from '../../utils/cardSizes';
 import { toKhmerNumerals } from '../../utils/khmerNumerals';
@@ -61,14 +63,21 @@ export const PdfExportView: React.FC = () => {
       : students;
 
   const totalCards = targetStudents.length;
-  const cardsPerPage = printSettings.cardsPerPage || 9;
+
+  // Exactly the settings the PDF export uses, and the same sheet layout function
+  const effectiveSettings = {
+    ...printSettings,
+    cardWidthMm: currentTemplate.cardWidthMm,
+    cardHeightMm: currentTemplate.cardHeightMm,
+  };
+  const sheet = computeSheetLayout(currentTemplate, effectiveSettings);
+  const cardsPerPage = sheet.cardsPerPage;
   const totalSheets = Math.ceil(totalCards / cardsPerPage) || (totalCards === 0 ? 0 : 1);
 
   const handleExportPdf = async (isTest: boolean = false) => {
     let exportList = isTest ? targetStudents.slice(0, cardsPerPage) : targetStudents;
     if (exportList.length === 0) {
       if (isTest) {
-        const { initialSeedStudents } = await import('../../db/seedData');
         exportList = initialSeedStudents.slice(0, cardsPerPage) as any;
       } else {
         alert('សូមជ្រើសរើស ឬបញ្ចូលសិស្សយ៉ាងហោចណាស់ម្នាក់ដើម្បីបោះពុម្ព');
@@ -88,11 +97,7 @@ export const PdfExportView: React.FC = () => {
       const pdfBytes = await generateStudentCardsPdf(
         exportList,
         currentTemplate,
-        {
-          ...printSettings,
-          cardWidthMm: currentTemplate.cardWidthMm,
-          cardHeightMm: currentTemplate.cardHeightMm,
-        },
+        effectiveSettings,
         printMode,
         (p) => setProgress(p)
       );
@@ -113,7 +118,7 @@ export const PdfExportView: React.FC = () => {
       addToast({
         type: 'success',
         title: 'ទាញយក PDF រួចរាល់!',
-        message: `បានបង្កើតឯកសារ PDF ចំនួន ${exportList.length} កាត (៩ កាតលើ A4)`,
+        message: `បានបង្កើតឯកសារ PDF ចំនួន ${exportList.length} កាត (${cardsPerPage} កាតលើ A4)`,
       });
     } catch (e: any) {
       console.error(e);
@@ -124,9 +129,39 @@ export const PdfExportView: React.FC = () => {
     }
   };
 
-  const previewNineCards = targetStudents.slice(0, cardsPerPage);
-  while (previewNineCards.length < cardsPerPage) {
-    previewNineCards.push(targetStudents[0] || ({} as any));
+  // Preview page 1 with the same students the PDF would contain
+  // (sample students when the list is empty, like the test export)
+  const previewStudents: Partial<Student>[] = (
+    targetStudents.length > 0 ? targetStudents : initialSeedStudents
+  ).slice(0, cardsPerPage);
+
+  // A4 sheet drawn to scale: same positions, margins, mirroring and trim marks as the PDF
+  const SHEET_W_PX = 620;
+  const pxPerMm = SHEET_W_PX / sheet.paperWidthMm;
+  const sheetHeightPx = sheet.paperHeightMm * pxPerMm;
+  const isBack = previewSide === 'back';
+  const sheetLeftMm = sheet.marginLeftMm + (isBack ? sheet.duplexOffsetXmM : 0);
+  const sheetTopMm = sheet.marginTopMm + (isBack ? sheet.duplexOffsetYmM : 0);
+  const cardPos = (i: number) => {
+    const r = Math.floor(i / sheet.cols);
+    const c = i % sheet.cols;
+    const col = isBack ? sheet.cols - 1 - c : c; // duplex column mirroring
+    return {
+      left: (sheetLeftMm + col * sheet.cardWidthMm) * pxPerMm,
+      top: (sheetTopMm + r * sheet.cardHeightMm) * pxPerMm,
+    };
+  };
+  const trimMarks: { x1: number; y1: number; x2: number; y2: number }[] = [];
+  if (printSettings.showCuttingGuides) {
+    const g = sheet.cuttingGuideLengthMm;
+    for (let r = 0; r <= sheet.rows; r++) {
+      const y = sheetTopMm + r * sheet.cardHeightMm;
+      for (let c = 0; c <= sheet.cols; c++) {
+        const x = sheetLeftMm + c * sheet.cardWidthMm;
+        if (r === 0 || r === sheet.rows) trimMarks.push({ x1: x - g, y1: y, x2: x + g, y2: y });
+        if (c === 0 || c === sheet.cols) trimMarks.push({ x1: x, y1: y - g, x2: x, y2: y + g });
+      }
+    }
   }
 
   return (
@@ -138,7 +173,7 @@ export const PdfExportView: React.FC = () => {
             បោះពុម្ពកាតលើ A4 (PDF Print Production)
           </h1>
           <p className="text-xs text-[#86868b] mt-0.5">
-            រៀបចំ ៩ កាតក្នុងមួយទំព័រ A4 (៣ ជួរឈរ × ៣ ជួរដេក) គាំទ្រ Duplex សងខាង និងបន្ទាត់កាត់
+            រៀបចំ {toKhmerNumerals(sheet.cardsPerPage)} កាតក្នុងមួយទំព័រ A4 ({toKhmerNumerals(sheet.cols)} ជួរឈរ × {toKhmerNumerals(sheet.rows)} ជួរដេក) គាំទ្រ Duplex សងខាង និងបន្ទាត់កាត់
           </p>
         </div>
 
@@ -293,7 +328,7 @@ export const PdfExportView: React.FC = () => {
                 { value: '9', label: '១ សន្លឹក ៩ កាត (3×3)' },
                 { value: '4', label: '១ សន្លឹក ៤ កាត (2×2)' },
               ]}
-              value={printSettings.cardsPerPage === 4 ? '4' : '9'}
+              value={sheet.cardsPerPage === 4 ? '4' : '9'}
               onChange={(v) => {
                 if (v === '4') {
                   setCardDimensions(70, 100);
@@ -419,15 +454,15 @@ export const PdfExportView: React.FC = () => {
         </div>
       </AppleCard>
 
-      {/* Interactive A4 Sheet 3x3 Preview */}
+      {/* A4 Sheet Preview (same layout & renderer as the exported PDF) */}
       <div className="flex flex-col items-center">
-        <div className="flex items-center justify-between w-full max-w-4xl mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 w-full max-w-4xl mb-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-[#1d1d1f]">
               ទំព័រ A4 គំរូ ({currentTemplate.name})
             </span>
             <AppleBadge variant="green" size="sm">
-              ៣ ជួរឈរ × ៣ ជួរដេក = ៩ កាត
+              {toKhmerNumerals(sheet.cols)} ជួរឈរ × {toKhmerNumerals(sheet.rows)} ជួរដេក = {toKhmerNumerals(sheet.cardsPerPage)} កាត
             </AppleBadge>
           </div>
 
@@ -442,35 +477,59 @@ export const PdfExportView: React.FC = () => {
           />
         </div>
 
-        {/* The A4 Canvas Sheet Representation */}
-        <div className="w-full max-w-full overflow-x-auto relative bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-black/[0.08] rounded-xl p-3 sm:p-6 flex flex-col items-center justify-center">
-          <div className="absolute top-2 left-3 text-[10px] text-[#86868b] font-mono">
-            ក្រដាស A4 (210 × 297 mm) | មាត្រដ្ឋានបោះពុម្ព ១០០%
+        <div className="w-full max-w-full overflow-x-auto relative bg-slate-100 shadow-inner border border-black/[0.08] rounded-xl p-3 sm:p-6 flex flex-col items-center">
+          <div className="text-[10px] text-[#86868b] font-mono mb-2 self-start">
+            ក្រដាស A4 ({sheet.paperWidthMm} × {sheet.paperHeightMm} mm) | កាត {sheet.cardWidthMm} × {sheet.cardHeightMm} mm | ដូច PDF ១០០%
           </div>
 
-          {/* 3x3 Grid of 9 Cards */}
-          <div className="grid grid-cols-3 gap-1.5 p-4 border border-dashed border-slate-300 rounded-lg bg-slate-50/40">
-            {previewNineCards.map((student, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-xs overflow-hidden shadow-xs border border-slate-200"
+          {/* The A4 page, drawn to scale */}
+          <div
+            className="relative bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] shrink-0"
+            style={{ width: `${SHEET_W_PX}px`, height: `${sheetHeightPx}px` }}
+          >
+            {previewStudents.map((student, idx) => {
+              const pos = cardPos(idx);
+              return (
+                <div key={idx} className="absolute" style={{ left: `${pos.left}px`, top: `${pos.top}px` }}>
+                  {isBack ? (
+                    <StudentCardBack
+                      template={currentTemplate}
+                      scale={pxPerMm / 5}
+                      showCuttingBorder={false}
+                    />
+                  ) : (
+                    <StudentCardFront
+                      student={student}
+                      template={currentTemplate}
+                      scale={pxPerMm / 5}
+                      showCuttingBorder={false}
+                    />
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Trim marks, same as in the PDF */}
+            {trimMarks.length > 0 && (
+              <svg
+                className="absolute inset-0 pointer-events-none"
+                width={SHEET_W_PX}
+                height={sheetHeightPx}
+                viewBox={`0 0 ${sheet.paperWidthMm} ${sheet.paperHeightMm}`}
               >
-                {previewSide === 'front' ? (
-                  <StudentCardFront
-                    student={student}
-                    template={currentTemplate}
-                    scale={0.48}
-                    showCuttingBorder={false}
+                {trimMarks.map((m, i) => (
+                  <line
+                    key={i}
+                    x1={m.x1}
+                    y1={m.y1}
+                    x2={m.x2}
+                    y2={m.y2}
+                    stroke="rgb(166,166,179)"
+                    strokeWidth={0.18}
                   />
-                ) : (
-                  <StudentCardBack
-                    template={currentTemplate}
-                    scale={0.48}
-                    showCuttingBorder={false}
-                  />
-                )}
-              </div>
-            ))}
+                ))}
+              </svg>
+            )}
           </div>
 
           {/* Duplex Alignment Notice */}
