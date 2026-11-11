@@ -1,6 +1,9 @@
 import React from 'react';
 import { AppleCard } from '../common/AppleCard';
 import { AppleBadge } from '../common/AppleBadge';
+import { useTemplateStore } from '../../store/useTemplateStore';
+import { computeSheetLayout } from '../../utils/cardSizes';
+import { toKhmerNumerals } from '../../utils/khmerNumerals';
 import {
   Code2,
   ShieldCheck,
@@ -11,6 +14,13 @@ import {
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
+  const { currentTemplate, printSettings } = useTemplateStore();
+  const sheet = computeSheetLayout(currentTemplate, {
+    ...printSettings,
+    cardWidthMm: currentTemplate.cardWidthMm,
+    cardHeightMm: currentTemplate.cardHeightMm,
+  });
+  const perSheetKm = toKhmerNumerals(sheet.cardsPerPage);
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Header */}
@@ -71,14 +81,18 @@ export const SettingsView: React.FC = () => {
 
           <div className="p-4 rounded-2xl bg-[#f5f5f7] space-y-1">
             <span className="text-[#86868b] block text-[11px]">នាយកសាលា (Director Name)</span>
-            <span className="text-sm font-bold text-[#1d1d1f] block">ជា សារ៉ា</span>
-            <span className="text-[10px] text-[#34c759]">បង្ហាញខាងក្រោមត្រានាយក</span>
+            <span className="text-sm font-bold text-[#1d1d1f] block">{currentTemplate.directorName || '—'}</span>
+            <span className={`text-[10px] ${currentTemplate.showDirectorName ? 'text-[#34c759]' : 'text-[#86868b]'}`}>
+              {currentTemplate.showDirectorName ? 'បង្ហាញលើកាត' : 'មិនបង្ហាញលើកាត'}
+            </span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#f5f5f7] space-y-1">
             <span className="text-[#86868b] block text-[11px]">ការបោះពុម្ព A4 (Print Layout)</span>
-            <span className="text-sm font-bold text-[#1d1d1f] block">៩ កាតក្នុង ១សន្លឹក A4</span>
-            <span className="text-[10px] text-[#6e6e73]">3 ជួរឈរ × 3 ជួរដេក (Duplex Mirrored)</span>
+            <span className="text-sm font-bold text-[#1d1d1f] block">{perSheetKm} កាតក្នុង ១សន្លឹក A4</span>
+            <span className="text-[10px] text-[#6e6e73]">
+              {sheet.cols} ជួរឈរ × {sheet.rows} ជួរដេក (Duplex Mirrored)
+            </span>
           </div>
         </div>
       </AppleCard>
@@ -177,7 +191,7 @@ export const SettingsView: React.FC = () => {
 
           <div className="p-4 rounded-2xl bg-[#f5f5f7]">
             <Printer size={20} className="text-purple-600 mb-2" />
-            <div className="font-semibold text-[#1d1d1f]">A4 ៩ កាត Print-Ready</div>
+            <div className="font-semibold text-[#1d1d1f]">A4 {perSheetKm} កាត Print-Ready</div>
             <div className="text-[#86868b] mt-1 text-[11px]">
               300 DPI គុណភាពបោះពុម្ពខ្ពស់ គាំទ្រ Duplex Mirroring ស្វ័យប្រវត្តិ។
             </div>

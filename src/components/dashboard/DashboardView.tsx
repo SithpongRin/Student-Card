@@ -10,6 +10,7 @@ import { StudentCardBack } from '../card/StudentCardBack';
 import { CardPreviewModal } from '../card/CardPreviewModal';
 import { Student } from '../../types/student';
 import { toKhmerNumerals } from '../../utils/khmerNumerals';
+import { cardsPerSheet } from '../../utils/cardSizes';
 import { formatDateTime } from '../../utils/formatters';
 import {
   Users,
@@ -26,7 +27,8 @@ import {
 
 export const DashboardView: React.FC = () => {
   const { setActiveView } = useAppStore();
-  const { currentTemplate } = useTemplateStore();
+  const { currentTemplate, printSettings } = useTemplateStore();
+  const perSheetKm = toKhmerNumerals(cardsPerSheet(currentTemplate, printSettings));
 
   const [totalStudents, setTotalStudents] = useState<number>(0);
   const [totalClasses, setTotalClasses] = useState<number>(0);
@@ -90,7 +92,7 @@ export const DashboardView: React.FC = () => {
             </h1>
             <p className="text-sm text-blue-100/80 font-battambang leading-relaxed">
               នាំចូលទិន្នន័យពី Excel បង្កើតកាតសិស្សតាមគំរូដើមផ្លូវការ និងបោះពុម្ពជា PDF
-              ខ្នាត A4 ចំនួន ៩ កាតក្នុងមួយទំព័រ ដំណើរការដោយមិនចាំបាច់មានអ៊ីនធឺណិត។
+              ខ្នាត A4 ចំនួន {perSheetKm} កាតក្នុងមួយទំព័រ ដំណើរការដោយមិនចាំបាច់មានអ៊ីនធឺណិត។
             </p>
           </div>
 
@@ -107,7 +109,7 @@ export const DashboardView: React.FC = () => {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600/60 hover:bg-blue-600/80 text-white font-medium text-xs backdrop-blur-md border border-white/20 active:scale-95 transition-all"
             >
               <Printer size={15} />
-              <span>បោះពុម្ព PDF ៩ កាត</span>
+              <span>បោះពុម្ព PDF {perSheetKm} កាត</span>
             </button>
           </div>
         </div>
@@ -293,7 +295,7 @@ export const DashboardView: React.FC = () => {
                     <Printer size={18} />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-[#1d1d1f]">បោះពុម្ពកាតលើ A4 (៩ កាត)</div>
+                    <div className="text-xs font-semibold text-[#1d1d1f]">បោះពុម្ពកាតលើ A4 ({perSheetKm} កាត)</div>
                     <div className="text-[11px] text-[#86868b]">Duplex ត្រូវគ្នា 300 DPI គុណភាពខ្ពស់</div>
                   </div>
                 </div>
