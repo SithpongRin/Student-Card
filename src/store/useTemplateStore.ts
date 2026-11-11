@@ -5,6 +5,12 @@ import { defaultReferenceTemplate } from '../db/defaultTemplates';
 import { defaultPrintSettings, db } from '../db/database';
 import { calculateA4GridLayout } from '../utils/cardSizes';
 
+export interface CardExactSizeOptions {
+  whiteMarginMm?: number;
+  photoWidthMm?: number;
+  photoHeightMm?: number;
+}
+
 interface TemplateStoreState {
   currentTemplate: CardTemplate;
   printSettings: PrintSettings;
@@ -12,7 +18,7 @@ interface TemplateStoreState {
 
   setTemplate: (template: CardTemplate) => void;
   updateTemplateField: <K extends keyof CardTemplate>(key: K, value: CardTemplate[K]) => void;
-  setCardDimensions: (widthMm: number, heightMm: number) => void;
+  setCardDimensions: (widthMm: number, heightMm: number, exact?: CardExactSizeOptions) => void;
   resetToReferenceTemplate: () => Promise<void>;
   saveTemplate: () => Promise<void>;
 
@@ -45,12 +51,17 @@ export const useTemplateStore = create<TemplateStoreState>((set, get) => ({
     });
   },
 
-  setCardDimensions: (widthMm: number, heightMm: number) => {
+  setCardDimensions: (widthMm: number, heightMm: number, exact?: CardExactSizeOptions) => {
     const layout = calculateA4GridLayout(widthMm, heightMm);
-    const updatedTemplate = {
+    const updatedTemplate: CardTemplate = {
       ...get().currentTemplate,
       cardWidthMm: widthMm,
       cardHeightMm: heightMm,
+      whiteMarginMm: exact?.whiteMarginMm,
+      useExactPhotoSize: !!(exact?.photoWidthMm && exact?.photoHeightMm),
+      ...(exact?.photoWidthMm && exact?.photoHeightMm
+        ? { photoBoxWidthMm: exact.photoWidthMm, photoBoxHeightMm: exact.photoHeightMm }
+        : {}),
       updatedAt: Date.now(),
     };
     const updatedPrintSettings = {

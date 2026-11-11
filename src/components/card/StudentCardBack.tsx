@@ -21,7 +21,16 @@ export const StudentCardBack: React.FC<StudentCardBackProps> = ({
   const isLandscape = cardW > cardH;
   const baseWidth = Math.round(cardW * 5);
   const baseHeight = Math.round(cardH * 5);
-  const s = isLandscape ? baseWidth / 430 : baseWidth / 320;
+  const exactMarginPx =
+    !isLandscape && template.whiteMarginMm && template.whiteMarginMm > 0
+      ? template.whiteMarginMm * 5
+      : 0;
+  const s = isLandscape
+    ? baseWidth / 430
+    : exactMarginPx
+    ? (baseWidth - 2 * exactMarginPx) / 308
+    : baseWidth / 320;
+  const outerPadPx = exactMarginPx || Math.round(6 * s);
   const blueColor = template.primaryColor || '#163d7e';
   const layout = template.backLayout || 'rules-and-emblem';
   const emblemSizePx = Math.round((Math.min(baseWidth, baseHeight) * (template.backEmblemSizePercent || 52)) / 100);
@@ -50,9 +59,11 @@ export const StudentCardBack: React.FC<StudentCardBackProps> = ({
           height: `${baseHeight}px`,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
-          padding: `${Math.round(6 * s)}px`,
+          padding: `${outerPadPx}px`,
+          outline: showCuttingBorder ? '1px dashed #cbd5e1' : undefined,
+          outlineOffset: '-1px',
         }}
-        className={`relative bg-white font-battambang box-border ${showCuttingBorder ? 'border border-dashed border-slate-300' : ''}`}
+        className="relative bg-white font-battambang box-border"
       >
         {layout === 'emblem-only' ? (
           <div className="w-full h-full flex items-center justify-center p-4">

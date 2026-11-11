@@ -34,7 +34,21 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
   // Scalability ratio based on canonical standard references:
   // Portrait reference: 64mm x 92mm => 320px x 460px
   // Landscape reference: 86mm x 54mm => 430px x 270px
-  const s = isLandscape ? baseWidth / 430 : baseWidth / 320;
+  // Exact-size mode: white edge is exactly whiteMarginMm, frame = card - 2× margin.
+  // Layout is scaled to the frame width (308 = 320 - 2×6 default padding).
+  const exactMarginPx =
+    !isLandscape && template.whiteMarginMm && template.whiteMarginMm > 0
+      ? template.whiteMarginMm * 5
+      : 0;
+  const s = isLandscape
+    ? baseWidth / 430
+    : exactMarginPx
+    ? (baseWidth - 2 * exactMarginPx) / 308
+    : baseWidth / 320;
+  const outerPadPx = exactMarginPx || Math.round(6 * s);
+  const exactPhoto = !!(
+    template.useExactPhotoSize && template.photoBoxWidthMm && template.photoBoxHeightMm
+  );
 
   const blueColor = template.primaryColor || '#163d7e';
   const isBottomPhoto = template.variant === 'bottom-photo';
@@ -100,11 +114,12 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
           height: `${baseHeight}px`,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
-          padding: `${Math.round(6 * s)}px`,
+          padding: `${outerPadPx}px`,
+          // outline (not border) so the cutting guide never shrinks the exact frame size
+          outline: showCuttingBorder ? '1px dashed #cbd5e1' : undefined,
+          outlineOffset: '-1px',
         }}
-        className={`relative bg-white font-battambang box-border ${
-          showCuttingBorder ? 'border border-dashed border-slate-300' : ''
-        }`}
+        className="relative bg-white font-battambang box-border"
       >
         {/* Outer Solid Blue Border */}
         <div
@@ -457,8 +472,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   style={{
                     borderColor: blueColor,
                     borderWidth: `${Math.max(1, 1.2 * s)}px`,
-                    width: `${Math.round(76 * s)}px`,
-                    height: `${Math.round(101 * s)}px`, // 76:101 ≈ 3:4
+                    width: exactPhoto ? `${template.photoBoxWidthMm * 5}px` : `${Math.round(76 * s)}px`,
+                    height: exactPhoto ? `${template.photoBoxHeightMm * 5}px` : `${Math.round(101 * s)}px`, // 76:101 ≈ 3:4
                   }}
                   className="border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
                 >
@@ -1045,8 +1060,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                   style={{
                     borderColor: blueColor,
                     borderWidth: `${Math.max(1, 1.2 * s)}px`,
-                    width: `${Math.round(84 * s)}px`,
-                    height: `${Math.round(112 * s)}px`, // Strictly 3:4 ratio (84:112)
+                    width: exactPhoto ? `${template.photoBoxWidthMm * 5}px` : `${Math.round(84 * s)}px`,
+                    height: exactPhoto ? `${template.photoBoxHeightMm * 5}px` : `${Math.round(112 * s)}px`, // Strictly 3:4 ratio (84:112)
                   }}
                   className="border border-solid bg-slate-50/20 shrink-0 flex items-center justify-center relative overflow-hidden"
                 >

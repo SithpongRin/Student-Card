@@ -81,13 +81,13 @@ export const defaultPrintSettings: PrintSettings = {
   paperSize: 'A4',
   paperWidthMm: 210,
   paperHeightMm: 297,
-  gridColumns: 3,
-  gridRows: 3,
-  cardsPerPage: 9,
-  cardWidthMm: 64,
-  cardHeightMm: 92,
-  marginTopMm: 10.5,
-  marginLeftMm: 9.0,
+  gridColumns: 2,
+  gridRows: 2,
+  cardsPerPage: 4,
+  cardWidthMm: 81, // 75 mm frame + 2 × 3 mm white edge
+  cardHeightMm: 116, // 110 mm frame + 2 × 3 mm white edge
+  marginTopMm: 32.5,
+  marginLeftMm: 24,
   gutterXmM: 0,
   gutterYmM: 0,
   duplexOffsetXmM: 0,
@@ -110,8 +110,7 @@ export async function initializeDatabase() {
         directorName: existingRef1.directorName || defaultReferenceTemplate.directorName,
         flourishUrl: resolveFlourishUrl(existingRef1.flourishUrl),
         emblemUrl: MOEYS_EMBLEM_DATA_URI,
-        photoBoxWidthMm: 30,
-        photoBoxHeightMm: 40,
+        ...(existingRef1.useExactPhotoSize ? {} : { photoBoxWidthMm: 30, photoBoxHeightMm: 40 }),
       });
     }
 
@@ -125,8 +124,7 @@ export async function initializeDatabase() {
         flourishUrl: resolveFlourishUrl(existingRef2.flourishUrl),
         emblemUrl: MOEYS_EMBLEM_DATA_URI,
         studentDeclaration: existingRef2.studentDeclaration || templateBattambangBottomPhoto.studentDeclaration,
-        photoBoxWidthMm: 30,
-        photoBoxHeightMm: 40,
+        ...(existingRef2.useExactPhotoSize ? {} : { photoBoxWidthMm: 30, photoBoxHeightMm: 40 }),
       });
     }
 

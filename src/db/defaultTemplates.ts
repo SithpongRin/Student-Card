@@ -20,8 +20,10 @@ export const defaultReferenceTemplate: CardTemplate = {
   isDefault: true,
   isReference: true,
 
-  cardWidthMm: 64,
-  cardHeightMm: 92,
+  cardWidthMm: 81, // 75 mm frame + 2 × 3 mm white edge
+  cardHeightMm: 116, // 110 mm frame + 2 × 3 mm white edge
+  whiteMarginMm: 3,
+  useExactPhotoSize: true,
 
   countryHeaderKm1: 'ព្រះរាជាណាចក្រកម្ពុជា',
   countryHeaderKm2: 'ជាតិ សាសនា ព្រះមហាក្សត្រ',
@@ -33,8 +35,8 @@ export const defaultReferenceTemplate: CardTemplate = {
   cardNumberPrefix: 'លេខៈ',
   academicYearPrefix: 'ឆ្នាំសិក្សា ២០......... - ២០.........',
 
-  photoBoxWidthMm: 30,
-  photoBoxHeightMm: 40,
+  photoBoxWidthMm: 21, // 2.1 cm
+  photoBoxHeightMm: 30, // 3 cm
   photoBoxText: '3 x 4',
   photoBoxPosition: 'top-left',
 
@@ -72,8 +74,10 @@ export const templateBattambangBottomPhoto: CardTemplate = {
   isDefault: false,
   isReference: false,
 
-  cardWidthMm: 64,
-  cardHeightMm: 92,
+  cardWidthMm: 81, // 75 mm frame + 2 × 3 mm white edge
+  cardHeightMm: 116, // 110 mm frame + 2 × 3 mm white edge
+  whiteMarginMm: 3,
+  useExactPhotoSize: true,
 
   countryHeaderKm1: 'ព្រះរាជាណាចក្រកម្ពុជា',
   countryHeaderKm2: 'ជាតិ សាសនា ព្រះមហាក្សត្រ',
@@ -85,8 +89,8 @@ export const templateBattambangBottomPhoto: CardTemplate = {
   cardNumberPrefix: '',
   academicYearPrefix: 'ឆ្នាំសិក្សា ២០២៤-២០២៥',
 
-  photoBoxWidthMm: 30,
-  photoBoxHeightMm: 40,
+  photoBoxWidthMm: 21, // 2.1 cm
+  photoBoxHeightMm: 30, // 3 cm
   photoBoxText: '3 x 4',
   photoBoxPosition: 'bottom-left',
 

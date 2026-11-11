@@ -3,22 +3,29 @@ import { defaultPrintSettings } from '../../db/database';
 import { defaultReferenceTemplate } from '../../db/defaultTemplates';
 
 describe('A4 9-Cards Layout & Geometry Calculation', () => {
-  it('calculates 3x3 grid geometry correctly on A4 paper (210 x 297 mm)', () => {
-    const cardW = defaultPrintSettings.cardWidthMm; // 64 mm
-    const cardH = defaultPrintSettings.cardHeightMm; // 92 mm
+  it('default print settings grid fits A4 with centered margins', () => {
+    const cardW = defaultPrintSettings.cardWidthMm; // 81 mm (75 frame + 2×3 white edge)
+    const cardH = defaultPrintSettings.cardHeightMm; // 116 mm (110 frame + 2×3 white edge)
+    const cols = defaultPrintSettings.gridColumns;
+    const rows = defaultPrintSettings.gridRows;
 
-    const totalWidth = 3 * cardW; // 192 mm
-    const totalHeight = 3 * cardH; // 276 mm
+    const totalWidth = cols * cardW;
+    const totalHeight = rows * cardH;
 
     expect(totalWidth).toBeLessThanOrEqual(210);
     expect(totalHeight).toBeLessThanOrEqual(297);
+    expect((210 - totalWidth) / 2).toBe(defaultPrintSettings.marginLeftMm);
+    expect((297 - totalHeight) / 2).toBe(defaultPrintSettings.marginTopMm);
+  });
 
-    // Side margins
-    const marginSide = (210 - totalWidth) / 2; // 9 mm
-    const marginTopBottom = (297 - totalHeight) / 2; // 10.5 mm
-
-    expect(marginSide).toBe(9);
-    expect(marginTopBottom).toBe(10.5);
+  it('default template frame is exactly 75 x 110 mm with a 21 x 30 mm photo', () => {
+    const t = defaultReferenceTemplate;
+    const m = t.whiteMarginMm ?? 0;
+    expect(t.cardWidthMm - 2 * m).toBe(75);
+    expect(t.cardHeightMm - 2 * m).toBe(110);
+    expect(t.useExactPhotoSize).toBe(true);
+    expect(t.photoBoxWidthMm).toBe(21);
+    expect(t.photoBoxHeightMm).toBe(30);
   });
 
   it('preserves authentic reference template properties', () => {

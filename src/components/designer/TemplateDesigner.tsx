@@ -591,7 +591,11 @@ export const TemplateDesigner: React.FC = () => {
                           key={preset.id}
                           type="button"
                           onClick={() => {
-                            setCardDimensions(preset.widthMm, preset.heightMm);
+                            setCardDimensions(preset.widthMm, preset.heightMm, {
+                              whiteMarginMm: preset.whiteMarginMm,
+                              photoWidthMm: preset.photoWidthMm,
+                              photoHeightMm: preset.photoHeightMm,
+                            });
                             addToast({
                               type: 'info',
                               title: 'បានប្តូរទំហំកាត',
@@ -613,7 +617,9 @@ export const TemplateDesigner: React.FC = () => {
                             )}
                           </div>
                           <div className="text-[11px] font-semibold text-[#0071e3] mt-0.5 font-sans">
-                            {preset.widthMm} mm × {preset.heightMm} mm
+                            {preset.whiteMarginMm
+                              ? `ស៊ុម ${preset.widthMm - 2 * preset.whiteMarginMm} × ${preset.heightMm - 2 * preset.whiteMarginMm} mm (+ គែមស ${preset.whiteMarginMm} mm = ${preset.widthMm} × ${preset.heightMm})`
+                              : `${preset.widthMm} mm × ${preset.heightMm} mm`}
                           </div>
                           <p className="text-[10px] text-[#86868b] mt-1 line-clamp-1">
                             {preset.descriptionKm}

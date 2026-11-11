@@ -29,6 +29,13 @@ export interface CardTemplate {
   photoBoxText: string; // "3 x 4"
   photoBoxPosition: 'top-left' | 'bottom-left';
 
+  // Exact-size mode: when whiteMarginMm is set, the blue frame measures exactly
+  // (cardWidthMm - 2*whiteMarginMm) x (cardHeightMm - 2*whiteMarginMm), i.e. the
+  // white edge is NOT counted in the frame size.
+  whiteMarginMm?: number;
+  // When true, the photo box is drawn at exactly photoBoxWidthMm x photoBoxHeightMm.
+  useExactPhotoSize?: boolean;
+
   // Signatures and Dates
   issueDateLine: string; // ថ្ងៃទី.........ខែ.........ឆ្នាំ២០...... or ធ្វើនៅថ្ងៃទី០១ ខែមករា ឆ្នាំ២០២២
   directorTitle: string; // នាយក or នាយកសាលា

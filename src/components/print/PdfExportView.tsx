@@ -21,6 +21,7 @@ import {
   PdfGenerationProgress,
 } from '../../services/pdfService';
 import { PrintMode } from '../../types/print';
+import { CARD_SIZE_PRESETS } from '../../utils/cardSizes';
 import { toKhmerNumerals } from '../../utils/khmerNumerals';
 import {
   FileDown,
@@ -343,7 +344,12 @@ export const PdfExportView: React.FC = () => {
               value={`${currentTemplate.cardWidthMm}x${currentTemplate.cardHeightMm}`}
               onChange={(e) => {
                 const [w, h] = e.target.value.split('x').map(Number);
-                setCardDimensions(w, h);
+                const preset = CARD_SIZE_PRESETS.find((p) => p.widthMm === w && p.heightMm === h);
+                setCardDimensions(w, h, {
+                  whiteMarginMm: preset?.whiteMarginMm,
+                  photoWidthMm: preset?.photoWidthMm,
+                  photoHeightMm: preset?.photoHeightMm,
+                });
                 const isFourCards = w > 68 || h > 95;
                 if (isFourCards) {
                   updatePrintSetting('cardsPerPage', 4);
@@ -357,6 +363,7 @@ export const PdfExportView: React.FC = () => {
               }}
               className="px-3 py-1.5 rounded-full text-xs bg-[#f5f5f7] border border-black/[0.06] font-semibold text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]"
             >
+              <option value="81x116">7.5 cm × 11 cm ស៊ុម (រូបថត 2.1 × 3 cm — ៤ កាតលើ A4)</option>
               <option value="60x90">6 cm × 9 cm (ស្រោមផ្លាស្ទិក A2 — ៩ កាតលើ A4)</option>
               <option value="64x92">6.4 cm × 9.2 cm (គំរូដើម MoEYS — ៩ កាតលើ A4)</option>
               <option value="70x100">7 cm × 10 cm (ស្រោមផ្លាស្ទិក A3 — ៤ កាតលើ A4)</option>

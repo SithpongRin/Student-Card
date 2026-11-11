@@ -92,6 +92,29 @@ function drawDottedLine(
 }
 
 /**
+ * Frame geometry. In exact-size mode (template.whiteMarginMm set) the white edge is
+ * exactly whiteMarginMm, so the blue frame measures card size minus 2× margin, and the
+ * layout is scaled to the frame width (233 base units = 242 - 2×4.5 default padding).
+ */
+function getFrameMetrics(
+  template: CardTemplate,
+  widthPx: number,
+  scale: number,
+  isLandscape: boolean
+): { sRatio: number; cardPad: number } {
+  const margin = template.whiteMarginMm;
+  if (!isLandscape && margin && margin > 0) {
+    const marginPx = margin * scale;
+    const sRatio = (widthPx - 2 * marginPx) / 233;
+    // Border is stroked centered on the rect (lineWidth 1.2 base units): inset by half the
+    // stroke so the OUTER edge of the blue line is exactly at the white-edge boundary.
+    return { sRatio, cardPad: marginPx + 0.6 * sRatio };
+  }
+  const sRatio = isLandscape ? widthPx / 350 : widthPx / 242;
+  return { sRatio, cardPad: 4.5 * sRatio };
+}
+
+/**
  * High-Resolution Canvas Renderer for Front Side
  * (Supports Variant 1 Top-Photo and Variant 2 Bottom-Photo)
  * Matches the Cambodian MoEYS physical student card 1:1 at 300 DPI print quality.
@@ -116,7 +139,7 @@ export async function renderFrontCardToCanvas(
   // The base responsive reference layout is 242px width x 348px height.
   // For portrait cards, sRatio maps 242px base units directly to canvas device pixels.
   // For landscape cards, sRatio maps 350px base units to canvas pixels.
-  const sRatio = isLandscape ? widthPx / 350 : widthPx / 242;
+  const { sRatio, cardPad } = getFrameMetrics(template, widthPx, scale, isLandscape);
 
   const canvas = document.createElement('canvas');
   canvas.width = widthPx;
@@ -131,8 +154,7 @@ export async function renderFrontCardToCanvas(
   const blue = template.primaryColor || '#163d7e';
   const isBottomPhoto = template.variant === 'bottom-photo';
 
-  // Outer padding: 4.5 base units -> 4.5 * sRatio
-  const cardPad = 4.5 * sRatio;
+  // Outer white edge: 4.5 base units, or the exact whiteMarginMm in exact-size mode
   const bx = cardPad;
   const by = cardPad;
   const bw = widthPx - 2 * cardPad;
@@ -279,14 +301,21 @@ export async function renderFrontCardToCanvas(
     }
 
     // 4. Photo Box on Left: exact 76 x 101 in 242-base (Strict 3:4 ratio, optimal height for 9-on-A4)
-    const photoW = Math.round(76 * sRatio);
-    const photoH = Math.round(101 * sRatio);
+    const exactPhoto = template.useExactPhotoSize && template.photoBoxWidthMm && template.photoBoxHeightMm;
+    const photoW = exactPhoto ? Math.round(template.photoBoxWidthMm * scale) : Math.round(76 * sRatio);
+    const photoH = exactPhoto ? Math.round(template.photoBoxHeightMm * scale) : Math.round(101 * sRatio);
     const photoX = cx;
     const photoY = curY + logoH + 3 * sRatio;
 
     ctx.strokeStyle = blue;
     ctx.lineWidth = 1.2 * sRatio;
-    ctx.strokeRect(photoX, photoY, photoW, photoH);
+    if (exactPhoto) {
+      // Outer edge of the line = exact photo size
+      const hw = 0.6 * sRatio;
+      ctx.strokeRect(photoX + hw, photoY + hw, photoW - 2 * hw, photoH - 2 * hw);
+    } else {
+      ctx.strokeRect(photoX, photoY, photoW, photoH);
+    }
 
     if (student?.photoUrl) {
       try {
@@ -813,14 +842,20 @@ export async function renderFrontCardToCanvas(
 
     // Bottom Photo & Signatures
     // Bottom Left Photo: exact 84 x 112 in 242-base (3:4 ratio)
-    const photoW = Math.round(84 * sRatio);
-    const photoH = Math.round(112 * sRatio);
+    const exactPhoto = template.useExactPhotoSize && template.photoBoxWidthMm && template.photoBoxHeightMm;
+    const photoW = exactPhoto ? Math.round(template.photoBoxWidthMm * scale) : Math.round(84 * sRatio);
+    const photoH = exactPhoto ? Math.round(template.photoBoxHeightMm * scale) : Math.round(112 * sRatio);
     const photoX = cx;
     const photoY = by + bh - photoH - 6 * sRatio;
 
     ctx.strokeStyle = blue;
     ctx.lineWidth = 1.2 * sRatio;
-    ctx.strokeRect(photoX, photoY, photoW, photoH);
+    if (exactPhoto) {
+      const hw = 0.6 * sRatio;
+      ctx.strokeRect(photoX + hw, photoY + hw, photoW - 2 * hw, photoH - 2 * hw);
+    } else {
+      ctx.strokeRect(photoX, photoY, photoW, photoH);
+    }
 
     if (student?.photoUrl) {
       try {
@@ -890,7 +925,7 @@ export async function renderBackCardToCanvas(
   const widthPx = Math.round(widthMm * scale);
   const heightPx = Math.round(heightMm * scale);
   const isLandscape = widthMm > heightMm;
-  const sRatio = isLandscape ? widthPx / 350 : widthPx / 242;
+  const { sRatio, cardPad } = getFrameMetrics(template, widthPx, scale, isLandscape);
 
   const canvas = document.createElement('canvas');
   canvas.width = widthPx;
@@ -927,7 +962,7 @@ export async function renderBackCardToCanvas(
   }
 
   // MODE 2 & 3: Rules & Emblem / Modern QR
-  const cardPad = 4.5 * sRatio;
+  ctx.textBaseline = 'top';
   const bx = cardPad;
   const by = cardPad;
   const bw = widthPx - 2 * cardPad;
@@ -955,9 +990,18 @@ export async function renderBackCardToCanvas(
     ctx.drawImage(logoImg, cx, curY, logoW, logoH);
 
     ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
     ctx.fillStyle = blue;
-    ctx.font = `normal ${Math.round(9.5 * sRatio)}px ${FONT_MOUL}`;
-    ctx.fillText(template.ministryDepartment || 'ក្រសួងអប់រំ យុវជន និងកីឡា', cx + logoW + 6 * sRatio, curY + 2 * sRatio);
+    const ministryText = template.ministryDepartment || 'ក្រសួងអប់រំ យុវជន និងកីឡា';
+    const ministryX = cx + logoW + 6 * sRatio;
+    const maxMinistryW = cx + cw - ministryX;
+    let fMinistry = 9.5;
+    ctx.font = `normal ${Math.round(fMinistry * sRatio)}px ${FONT_MOUL}`;
+    while (ctx.measureText(ministryText).width > maxMinistryW && fMinistry > 6) {
+      fMinistry -= 0.25;
+      ctx.font = `normal ${Math.round(fMinistry * sRatio)}px ${FONT_MOUL}`;
+    }
+    ctx.fillText(ministryText, ministryX, curY + 2 * sRatio);
 
     ctx.fillStyle = '#334155';
     ctx.font = `bold ${Math.round(8.5 * sRatio)}px ${FONT_BATTAMBANG}`;
@@ -1002,7 +1046,16 @@ export async function renderBackCardToCanvas(
     ctx.fillText('•', cx + 2 * sRatio, curY);
 
     ctx.fillStyle = '#1e293b';
+    // Shrink long rules so they never run past the right border
+    const maxRuleW = cx + cw - (cx + 10 * sRatio);
+    let fRule = 8.5;
+    ctx.font = `normal ${ruleFontSize}px ${FONT_BATTAMBANG}`;
+    while (ctx.measureText(ruleText).width > maxRuleW && fRule > 6) {
+      fRule -= 0.25;
+      ctx.font = `normal ${Math.round(fRule * sRatio)}px ${FONT_BATTAMBANG}`;
+    }
     ctx.fillText(ruleText, cx + 10 * sRatio, curY);
+    ctx.font = `normal ${ruleFontSize}px ${FONT_BATTAMBANG}`;
     curY += ruleGap;
   }
 
@@ -1034,7 +1087,7 @@ export async function renderBackCardToCanvas(
     ctx.font = `bold ${Math.round(7 * sRatio)}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
-    ctx.fillText('MOEYS-ID', barX + barW / 2, barY + barH + 6 * sRatio);
+    ctx.fillText('MOEYS-ID', barX + barW / 2, barY + barH + 1.5 * sRatio);
   }
 
   return canvas;

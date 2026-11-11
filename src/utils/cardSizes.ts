@@ -7,7 +7,15 @@ export interface CardSizePreset {
   orientation: 'portrait' | 'landscape';
   descriptionKm: string;
   isPopular?: boolean;
+  /** White edge outside the blue frame (per side). Frame = width/height minus 2× this. */
+  whiteMarginMm?: number;
+  /** Exact photo box size in mm (width × height). */
+  photoWidthMm?: number;
+  photoHeightMm?: number;
 }
+
+/** White edge (per side) used for the 7.5 × 11 cm frame preset. */
+export const FRAME_75x110_WHITE_MARGIN_MM = 3;
 
 export interface SheetLayoutOption {
   id: '9-cards' | '4-cards';
@@ -47,6 +55,19 @@ export const A4_SHEET_LAYOUT_OPTIONS: SheetLayoutOption[] = [
 ];
 
 export const CARD_SIZE_PRESETS: CardSizePreset[] = [
+  {
+    id: 'frame-75x110',
+    nameKm: '៧.៥ cm × ១១ cm (រូបថត ២.១ × ៣ cm)',
+    nameEn: '75 × 110 mm frame + white edge (4 on A4)',
+    widthMm: 75 + 2 * FRAME_75x110_WHITE_MARGIN_MM,
+    heightMm: 110 + 2 * FRAME_75x110_WHITE_MARGIN_MM,
+    orientation: 'portrait',
+    descriptionKm: 'ស៊ុមខៀវ ៧.៥ × ១១ cm សុក្រិត (មិនគិតគែមស) ប្រអប់រូបថត ២.១ × ៣ cm (៤ កាតលើ A4)',
+    isPopular: true,
+    whiteMarginMm: FRAME_75x110_WHITE_MARGIN_MM,
+    photoWidthMm: 21,
+    photoHeightMm: 30,
+  },
   {
     id: 'a2-pouch-6x9',
     nameKm: '៦ cm × ៩ cm (ស្រោមផ្លាស្ទិក A2)',
