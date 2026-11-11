@@ -40,6 +40,7 @@ export interface CardTemplate {
   issueDateLine: string; // ថ្ងៃទី.........ខែ.........ឆ្នាំ២០...... or ធ្វើនៅថ្ងៃទី០១ ខែមករា ឆ្នាំ២០២២
   directorTitle: string; // នាយក or នាយកសាលា
   directorName?: string; // e.g. "ជា សារ៉ា"
+  showDirectorName?: boolean; // default false: director name is NOT printed on the card
   signatureTitle: string; // ហត្ថលេខាសាមីខ្លួន
   studentDeclaration?: string; // ជាសិស្ស វិទ្យាល័យ... (for bottom-photo template)
 

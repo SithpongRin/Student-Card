@@ -396,6 +396,15 @@ export const TemplateDesigner: React.FC = () => {
                       placeholder="ឧ. ជា សារ៉ា"
                       className="w-full px-3 py-2 rounded-xl bg-[#f5f5f7] border border-black/[0.06] focus:ring-2 focus:ring-[#0071e3] focus:outline-none font-bold text-[#1d1d1f]"
                     />
+                    <label className="mt-1.5 flex items-center gap-2 text-[11px] text-[#1d1d1f] cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={!!currentTemplate.showDirectorName}
+                        onChange={(e) => updateTemplateField('showDirectorName', e.target.checked)}
+                        className="w-4 h-4 accent-[#0071e3]"
+                      />
+                      បង្ហាញឈ្មោះនាយកលើកាត (Show director name)
+                    </label>
                   </div>
                 </div>
 

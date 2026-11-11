@@ -108,6 +108,8 @@ export async function initializeDatabase() {
       await db.templates.update(TEMPLATE_1_ID, {
         schoolNameOnly: existingRef1.schoolNameOnly || defaultReferenceTemplate.schoolNameOnly,
         directorName: existingRef1.directorName || defaultReferenceTemplate.directorName,
+        // Old default "right thumbprint" box is now a signature box
+        ...(existingRef1.signatureTitle === 'ស្នាមមេដៃស្ដាំ' ? { signatureTitle: 'ហត្ថលេខា' } : {}),
         flourishUrl: resolveFlourishUrl(existingRef1.flourishUrl),
         emblemUrl: MOEYS_EMBLEM_DATA_URI,
         ...(existingRef1.useExactPhotoSize ? {} : { photoBoxWidthMm: 30, photoBoxHeightMm: 40 }),

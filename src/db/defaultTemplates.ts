@@ -43,7 +43,8 @@ export const defaultReferenceTemplate: CardTemplate = {
   issueDateLine: 'ថ្ងៃទី.........ខែ.........ឆ្នាំ២០......',
   directorTitle: 'នាយក',
   directorName: 'ជា សារ៉ា',
-  signatureTitle: 'ស្នាមមេដៃស្ដាំ',
+  showDirectorName: false,
+  signatureTitle: 'ហត្ថលេខា',
   studentDeclaration: '',
 
   primaryColor: '#163d7e', // Official print deep blue
@@ -97,6 +98,7 @@ export const templateBattambangBottomPhoto: CardTemplate = {
   issueDateLine: 'ធ្វើនៅថ្ងៃទី០១ ខែមករា ឆ្នាំ២០២៥',
   directorTitle: 'នាយកសាលា',
   directorName: 'ជា សារ៉ា',
+  showDirectorName: false,
   signatureTitle: '',
   studentDeclaration: 'ជាសិស្ស អនុវិទ្យាល័យ ដំណាក់ព្រីង',
 

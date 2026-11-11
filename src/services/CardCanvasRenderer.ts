@@ -114,6 +114,11 @@ function getFrameMetrics(
   return { sRatio, cardPad: 4.5 * sRatio };
 }
 
+/** Director name is printed only when explicitly enabled in the template. */
+function directorNameToPrint(template: CardTemplate): string {
+  return template.showDirectorName ? (template.directorName || '').trim() : '';
+}
+
 /**
  * High-Resolution Canvas Renderer for Front Side
  * (Supports Variant 1 Top-Photo and Variant 2 Bottom-Photo)
@@ -640,10 +645,10 @@ export async function renderFrontCardToCanvas(
       ));
 
     const leftTitle = rightIsDirector ? (template.directorTitle || 'ស្នាមមេដៃស្ដាំ') : (template.directorTitle || 'នាយក');
-    const leftName = rightIsDirector ? (student?.nameKm || '') : (template.directorName || 'ជា សារ៉ា');
+    const leftName = rightIsDirector ? (student?.nameKm || '') : directorNameToPrint(template);
 
-    const rightTitle = rightIsDirector ? (template.signatureTitle || 'ហត្ថលេខានាយក/រដ្ឋបាល') : (template.signatureTitle || 'ហត្ថលេខាសាមីខ្លួន');
-    const rightName = rightIsDirector ? (template.directorName || 'ជា សារ៉ា') : (student?.nameKm || '');
+    const rightTitle = rightIsDirector ? (template.signatureTitle || 'ហត្ថលេខានាយក/រដ្ឋបាល') : (template.signatureTitle || 'ហត្ថលេខា');
+    const rightName = rightIsDirector ? directorNameToPrint(template) : (student?.nameKm || '');
 
     // Left block center & Right block center
     const leftCenterX = cx + 58 * sRatio;
@@ -907,7 +912,7 @@ export async function renderFrontCardToCanvas(
     ctx.font = `normal ${Math.round(11 * sRatio)}px ${FONT_MOUL}`;
     ctx.fillText(template.directorTitle || 'នាយកសាលា', sigX + sigW / 2, photoY + photoH - 24 * sRatio);
 
-    const dirName = template.directorName || 'ជា សារ៉ា';
+    const dirName = directorNameToPrint(template);
     ctx.font = `bold ${Math.round(10.5 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(dirName, sigX + sigW / 2, photoY + photoH - 8 * sRatio);
   }
@@ -1284,11 +1289,12 @@ async function renderLandscapeFrontCard(
   ctx.font = `normal ${fFoot}px ${FONT_BATTAMBANG}`;
   ctx.fillText(`${template.issueDateLine || 'ថ្ងៃទី...ខែ...ឆ្នាំ២០...'}`, rx, curY);
   ctx.font = `bold ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
-  ctx.fillText(`${template.directorTitle || 'នាយក'}: ${template.directorName || 'ជា សារ៉ា'}`, rx, curY + 11 * sRatio);
+  const landscapeDir = directorNameToPrint(template);
+  ctx.fillText(landscapeDir ? `${template.directorTitle || 'នាយក'}: ${landscapeDir}` : (template.directorTitle || 'នាយក'), rx, curY + 11 * sRatio);
 
   ctx.textAlign = 'right';
   ctx.font = `medium ${fFoot}px ${FONT_BATTAMBANG}`;
-  ctx.fillText(template.signatureTitle || 'ហត្ថលេខាសាមីខ្លួន', rx + rw, curY);
+  ctx.fillText(template.signatureTitle || 'ហត្ថលេខា', rx + rw, curY);
   if (student?.nameKm) {
     ctx.font = `bold ${Math.round(9 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(student.nameKm, rx + rw, curY + 11 * sRatio);
