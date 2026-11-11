@@ -759,12 +759,12 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                     style={{
                       color: blueColor,
                       fontSize: `${Math.round(8.5 * s)}px`,
-                      marginTop: 'auto',
-                      paddingTop: `${Math.round(2 * s)}px`,
+                      marginTop: `${Math.round(3 * s)}px`,
+                      paddingBottom: `${Math.round(4 * s)}px`,
                     }}
-                    className="leading-tight flex flex-col justify-end"
+                    className="leading-tight flex flex-col flex-1 min-h-0"
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-stretch flex-1">
                       {/* Left Block */}
                       <div
                         className="text-center flex flex-col items-center"
@@ -782,8 +782,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                         </div>
                         {/* Dedicated space */}
                         <div
-                          className="w-full flex items-center justify-center"
-                          style={{ height: `${Math.round(18 * s)}px` }}
+                          className="w-full flex flex-1 items-end justify-center"
+                          style={{ minHeight: `${Math.round(18 * s)}px`, paddingBottom: `${Math.round(3 * s)}px` }}
                         >
                           <div
                             className="border-b border-dotted border-current opacity-30"
@@ -816,8 +816,8 @@ export const StudentCardFront: React.FC<StudentCardFrontProps> = ({
                         </div>
                         {/* Dedicated space */}
                         <div
-                          className="w-full flex items-center justify-center"
-                          style={{ height: `${Math.round(18 * s)}px` }}
+                          className="w-full flex flex-1 items-end justify-center"
+                          style={{ minHeight: `${Math.round(18 * s)}px`, paddingBottom: `${Math.round(3 * s)}px` }}
                         >
                           <div
                             className="border-b border-dotted border-current opacity-30"

@@ -611,12 +611,15 @@ export async function renderFrontCardToCanvas(
 
     // 7. FOOTER SIGNATURES & NAMES AREA
     // Strictly anchored with safe bottom buffer and descender room so Director Name (ឈ្មោះនាយក) is NEVER cut off!
-    const footerH = 46 * sRatio;
     const innerBottom = by + bh - innerPad;
-    // Generous clamp so director name with Khmer sub-scripts (ជើងអក្សរ & ស្រៈក្រោម) has >6.5 base units of clear room
+    // Date + titles sit right under the address line (not pinned to the bottom), so the
+    // gap between the titles and the dotted line becomes a roomy signing area.
+    // Clamp so director name with Khmer sub-scripts (ជើងអក្សរ & ស្រៈក្រោម) always has clear room.
     const maxAllowedYDate = innerBottom - 46 * sRatio;
-    const targetFooterY = innerBottom - footerH;
-    const yDate = Math.min(Math.max(fullY + 3 * sRatio, targetFooterY), maxAllowedYDate);
+    const yDate = Math.min(fullY + 6 * sRatio, maxAllowedYDate);
+    // Names anchored near the bottom border (>= 7 base units of descender room)
+    const nameY = Math.max(yDate + 29.5 * sRatio, innerBottom - 17 * sRatio);
+    const signLineY = nameY - 4 * sRatio;
     const fFooter = Math.round(8.5 * sRatio);
 
     // Detect if right side represents Director or Student
@@ -660,7 +663,7 @@ export async function renderFrontCardToCanvas(
     drawDottedLine(
       ctx,
       leftCenterX - 36 * sRatio,
-      yDate + 21 * sRatio,
+      signLineY,
       leftCenterX + 36 * sRatio,
       blue,
       0.8 * sRatio,
@@ -671,7 +674,7 @@ export async function renderFrontCardToCanvas(
     // Left Name underneath (if present)
     if (leftName) {
       ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
-      ctx.fillText(leftName, leftCenterX, yDate + 29.5 * sRatio);
+      ctx.fillText(leftName, leftCenterX, nameY);
     }
 
     // Right Title
@@ -683,7 +686,7 @@ export async function renderFrontCardToCanvas(
     drawDottedLine(
       ctx,
       rightCenterX - 38 * sRatio,
-      yDate + 21 * sRatio,
+      signLineY,
       rightCenterX + 38 * sRatio,
       blue,
       0.8 * sRatio,
@@ -694,7 +697,7 @@ export async function renderFrontCardToCanvas(
     // Right Name underneath (Director Name or Student Name)
     if (rightName) {
       ctx.font = `bold ${Math.round(10 * sRatio)}px ${FONT_BATTAMBANG}`;
-      ctx.fillText(rightName, rightCenterX, yDate + 29.5 * sRatio);
+      ctx.fillText(rightName, rightCenterX, nameY);
     }
   }
 
