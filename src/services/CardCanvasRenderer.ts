@@ -610,16 +610,22 @@ export async function renderFrontCardToCanvas(
     drawFullLine('ទីលំនៅបច្ចុប្បន្នៈ', student?.address, true, false, 9.5);
 
     // 7. FOOTER SIGNATURES & NAMES AREA
-    // Strictly anchored with safe bottom buffer and descender room so Director Name (ឈ្មោះនាយក) is NEVER cut off!
+    // One block:  date → title → signing space → dotted line → name.
+    // Small fixed gaps above (under the address) and below (descender room so Khmer
+    // ជើងអក្សរ & ស្រៈក្រោម are never cut off); all remaining height is signing space.
     const innerBottom = by + bh - innerPad;
-    // Date + titles sit right under the address line (not pinned to the bottom), so the
-    // gap between the titles and the dotted line becomes a roomy signing area.
-    // Clamp so director name with Khmer sub-scripts (ជើងអក្សរ & ស្រៈក្រោម) always has clear room.
-    const maxAllowedYDate = innerBottom - 46 * sRatio;
-    const yDate = Math.min(fullY + 6 * sRatio, maxAllowedYDate);
-    // Names anchored near the bottom border (>= 7 base units of descender room)
-    const nameY = Math.max(yDate + 29.5 * sRatio, innerBottom - 17 * sRatio);
-    const signLineY = nameY - 4 * sRatio;
+    const addrBottom = fullY - 2 * sRatio; // bottom of the address text row
+    const available = innerBottom - addrBottom;
+    const DATE_ROW = 11, TITLE_ROW = 12, LINE_TO_NAME = 4, NAME_ROW = 13;
+    const fixedH = (DATE_ROW + TITLE_ROW + LINE_TO_NAME + NAME_ROW) * sRatio;
+    const topGap = 7 * sRatio; // small gap under the address line
+    const bottomGap = 7 * sRatio; // descender room under the names
+    // All remaining height becomes signing space (clamped to a sensible range)
+    const signSpace = Math.max(18 * sRatio, Math.min(60 * sRatio, available - fixedH - topGap - bottomGap));
+    const yDate = addrBottom + topGap;
+    const titleY = yDate + DATE_ROW * sRatio;
+    const signLineY = titleY + TITLE_ROW * sRatio + signSpace;
+    const nameY = signLineY + LINE_TO_NAME * sRatio;
     const fFooter = Math.round(8.5 * sRatio);
 
     // Detect if right side represents Director or Student
@@ -655,7 +661,7 @@ export async function renderFrontCardToCanvas(
     }
 
     // Left Title
-    const leftTitleY = !rightIsDirector ? yDate + 10 * sRatio : yDate + 10 * sRatio;
+    const leftTitleY = titleY;
     ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(leftTitle, leftCenterX, leftTitleY);
 
@@ -678,16 +684,16 @@ export async function renderFrontCardToCanvas(
     }
 
     // Right Title
-    const rightTitleY = rightIsDirector ? yDate + 10 * sRatio : yDate + 10 * sRatio;
+    const rightTitleY = titleY;
     ctx.font = `bold ${Math.round(9.5 * sRatio)}px ${FONT_BATTAMBANG}`;
     ctx.fillText(rightTitle, rightCenterX, rightTitleY);
 
     // Right dedicated dotted line
     drawDottedLine(
       ctx,
-      rightCenterX - 38 * sRatio,
+      rightCenterX - 36 * sRatio,
       signLineY,
-      rightCenterX + 38 * sRatio,
+      rightCenterX + 36 * sRatio,
       blue,
       0.8 * sRatio,
       2,
